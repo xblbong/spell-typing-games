@@ -1,0 +1,25 @@
+{
+  "name": "spell-typing-games",
+  "version": "1.0.0",
+  "description": "\"# spell-typing-games\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xblbong/spell-typing-games.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/xblbong/spell-typing-games/issues"
+  },
+  "homepage": "https://github.com/xblbong/spell-typing-games#readme",
+  "dependencies": {
+    "phaser": "^4.2.1",
+    "vite": "^8.1.5"
+  }
+}
