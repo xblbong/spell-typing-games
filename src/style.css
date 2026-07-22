@@ -8,7 +8,7 @@
 }
 
 :root {
-    --warna-background: #1a1a2e;
+    --color-background: #1a1a2e;
 }
 
 canvas {
@@ -22,4 +22,26 @@ body {
     min-height: 100vh;
     background: #1a1a2e;
     overflow: hidden;
+} 
+
+.app-container {
+    position: relative;
+    height: 100vh;
+}
+
+.overlay-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.overlay-ui h1 {
+    color: #ffcc00;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 24px;
+    padding: 20px;
 }
