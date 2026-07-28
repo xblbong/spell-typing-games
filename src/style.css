@@ -45,3 +45,38 @@ body {
     font-size: 24px;
     padding: 20px;
 }
+
+/* Styling untuk Input Nama di IntroScene */
+.game-input {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+
+    width: 320px;
+    padding: 14px 20px;
+    background: rgba(15, 15, 35, 0.9);
+    color: #00ffcc;
+    border: 2px solid #7b56ff;
+    border-radius: 12px;
+    font-family: 'Press Start 2P', monospace;
+    text-align: center;
+    font-size: 16px;
+    outline: none;
+    box-shadow: 0 0 15px rgba(123, 86, 255, 0.4), inset 0 0 10px rgba(123, 86, 255, 0.1);
+    transition: all 0.3s ease;
+    letter-spacing: 2px;
+}
+
+.game-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.game-input:focus {
+    border-color: #00ffcc;
+    box-shadow: 0 0 25px rgba(0, 255, 204, 0.4), inset 0 0 15px rgba(0, 255, 204, 0.1);
+    background: rgba(10, 10, 30, 0.95);
+}

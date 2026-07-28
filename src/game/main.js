@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { GameScene } from '../scene/GameScene';
 import { MenuScene } from '../scene/MenuScene';
+import { IntroScene } from '../scene/IntroScene';
+import { ResultScene } from '../scene/ResultScene';
 
 export const config = {
     type: Phaser.AUTO,
@@ -24,6 +26,6 @@ export const startPhaser = (containerId) => {
             default: 'arcade',
             arcade: { debug: false }
         },
-        scene: [MenuScene, GameScene]
+        scene: [IntroScene,  MenuScene, GameScene, ResultScene]
     });
 };
