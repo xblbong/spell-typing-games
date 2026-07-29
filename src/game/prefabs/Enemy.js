@@ -17,6 +17,7 @@ export default class Enemy extends Phaser.GameObjects.Container {
         this.textBg = scene.add.text(0, -65, '', style).setOrigin(0.5).setAlpha(0.5);
         this.textFg = scene.add.text(0, -65, '', { ...style, backgroundColor: null }).setOrigin(0.5).setColor('#00ffcc');
         this.sprite = scene.add.image(0, 0, enemyData.sprite).setScale(0.2);
+        this.sprite.setFlipX(true); //balik images
 
         // 2. MASUKKAN KE DALAM CONTAINER
         this.add([this.sprite, this.textBg, this.textFg]);
