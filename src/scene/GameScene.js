@@ -91,14 +91,35 @@ export class GameScene extends Phaser.Scene {
     }
 
     setupHUD(width, height) {
-        this.add.graphics().fillStyle(0x000000, 0.5).fillRoundedRect(20, 25, 200, 30, 8);
+        // 1. Koordinat dasar Bar Mana
+        const barX = 20;
+        const barY = 25;
+        const barWidth = 200;
+        const barHeight = 30;
+
+        // Gambar Container Gelap di belakang
+        this.add.graphics()
+            .fillStyle(0x000000, 0.5)
+            .fillRoundedRect(barX, barY, barWidth + 60, barHeight, 8);
+
+        // object ini untuk isi mana
         this.manaFill = this.add.graphics();
 
-        this.add.graphics().fillStyle(0x000000, 0.5).fillRoundedRect(width - 220, 25, 200, 30, 8);
+        // tambah bagian teks samping mana
+        this.add.text(barX + barWidth + 10, barY + 7, 'MANA', {
+            fontSize: '14px',
+            fontFamily: 'monospace',
+            fontWeight: 'bold',
+            color: '#00ffff'
+        });
+
+        // area coins
+        this.add.graphics().fillStyle(0x000000, 0.5).fillRoundedRect(width - 150, 25, 150, 30, 10);
         this.coinText = this.add.text(width - 35, 32, '', {
             fontSize: '18px', color: '#ffcc00', fontFamily: 'monospace', fontWeight: 'bold'
         }).setOrigin(1, 0);
 
+        // info level
         this.infoText = this.add.text(width / 2, 40, '', {
             fontSize: '22px', fontFamily: 'monospace', color: '#ffffff'
         }).setOrigin(0.5);
@@ -243,9 +264,9 @@ export class GameScene extends Phaser.Scene {
     applyPenalty() {
         // Efek visual
         this.cameras.main.shake(100, 0.003);
-        
+
         // Gunakan fungsi pembantu (kurangi 15 mana)
-        this.reduceMana(15); 
+        this.reduceMana(15);
     }
 
     takeDamage(enemy) {
@@ -260,7 +281,7 @@ export class GameScene extends Phaser.Scene {
 
         // Simpan attack power musuh sebelum dihancurkan
         const damage = enemy.stats.attackPower;
-        
+
         enemy.die();
 
         // Gunakan fungsi pembantu untuk kurangi mana sesuai kekuatan musuh

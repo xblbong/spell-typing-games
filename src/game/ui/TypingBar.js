@@ -28,7 +28,7 @@ export default class TypingBar {
         });
 
         // 3. Teks & Kursor
-        this.placeholderText = scene.add.text(x, y, 'READY TO CAST...', style)
+        this.placeholderText = scene.add.text(x, y, 'Enter Keyword here...', style)
             .setOrigin(0.5).setColor('#555555').setAlpha(0.5);
 
         this.bgText = scene.add.text(x, y, '', style).setOrigin(0.5).setAlpha(0.15);
