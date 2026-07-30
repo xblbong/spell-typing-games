@@ -21,7 +21,7 @@ export default class Enemy extends Phaser.GameObjects.Container {
 
         // 2. MASUKKAN KE DALAM CONTAINER
         this.add([this.sprite, this.textBg, this.textFg]);
-        
+
         // 3. BARU JALANKAN ANIMASI (TWEEN)
         if (this.stats.movementType === "Flying") {
             scene.tweens.add({
@@ -57,6 +57,17 @@ export default class Enemy extends Phaser.GameObjects.Container {
     }
 
     die() {
-        this.destroy();
+        this.active = false //fungsi move agar musuh berhenti jalan saat sedang kedip
+
+        this.scene.tweens.add({
+            targets: this,
+            alpha: 0, //berubah jadi transparant
+            duration: 100, //kecepatan kedipnya 1 detik
+            repeat: 3, // ulangi kedip 3x
+            yoyo: true, //looping muncul-hilang
+            onComplete: () => {
+                this.destroy(); //setelah kedip selesai baru destroy hapus dari game
+            }
+        })
     }
 }

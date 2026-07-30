@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { gameData } from '../data';
 import Enemy from '../game/prefabs/Enemy';
 import TypingBar from '../game/ui/TypingBar';
+import { wordLibrary } from '../data/wordLibrary';
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -45,7 +46,13 @@ export class GameScene extends Phaser.Scene {
     preload() {
         // Memuat gambar karakter penyihir (Penyihir diam & Penyihir merapal mantra)
         this.load.image('wizard_idle', 'images/characters/Luma_cimol.png');
+        this.load.image('wizard_dead', 'images/characters/Luma_dead.png');
         this.load.image('wizard_attack', 'images/characters/Wizard_chanting.png');
+
+        // Memuat gambar untuk background Spesifik Level dari Data
+        if (this.level.bgKey && this.level.bgPath) {
+            this.load.image(this.level.bgKey, this.level.bgPath);
+        }
 
         // Memuat semua Efek Suara (SFX)
         this.load.audio('keyboard', 'music/keyboard.mp3');      // Suara ngetik
@@ -56,9 +63,22 @@ export class GameScene extends Phaser.Scene {
         this.load.audio('boom', 'music/boom.mp3');               // Suara musuh meledak/mati
         this.load.audio('bgm_music', 'music/background-music.mp3'); // Musik latar
 
+        // Memuat Video Serangan Musuh
+        this.load.video('attack_vfx', 'video/attack.mp4')
+
         // Memuat aset gambar musuh secara otomatis berdasarkan daftar musuh di level ini
         this.level.enemies.forEach(enemy => {
             this.load.image(enemy.sprite, enemy.imagePath);
+        });
+
+        // Memuat JSON Kata secara dinamis berdasarkan WordLibrary
+        this.level.enemies.forEach(enemy => {
+            const lib = wordLibrary[enemy.wordLibID];
+            // Cek jika JSON belum di-load untuk menghindari double load
+            if (lib.jsonPath && !this.cache.json.exists(lib.jsonKey)) {
+                this.load.json(lib.jsonKey, lib.jsonPath);
+                console.log(`Loading JSON Words: ${lib.jsonKey}`);
+            }
         });
     }
 
@@ -105,9 +125,17 @@ export class GameScene extends Phaser.Scene {
      * [SETUP ENVIRONMENT] Mengatur latar belakang dan animasi penyihir.
      */
     setupEnvironment(width, height) {
-        // Gambar Langit & Tanah
-        this.add.rectangle(0, 0, width, height, 0x1a1a2e).setOrigin(0);
-        this.add.rectangle(0, height - 120, width, 120, 0x150d1d).setOrigin(0);
+        // tampilkan gambar background dari data level 
+        if (this.level.bgKey && this.textures.exists(this.level.bgKey)) {
+            const bg = this.add.image(width / 2, height / 2, this.level.bgKey); //letakan di tengah menggunakan width/2 dan height/2 
+            bg.setDisplaySize(width, height); //setSize full size menutupi layar (fullscreen)
+        } else {
+            // gambar langit
+            this.add.rectangle(0, 0, width, height, 0x1a1a2e).setOrigin(0); //fallback jika gambar tidak ada gunakan warna solid agar tidak putih
+        }
+
+        // Gambar Tanah
+        this.add.rectangle(0, height - 120, width, 120, 0x150d1d, 0.5).setOrigin(0);
 
         // Partikel Bintang (Menambah suasana malam)
         for (let i = 0; i < 25; i++) {
@@ -126,8 +154,8 @@ export class GameScene extends Phaser.Scene {
         // Efek "Breathe" (Penyihir bergerak naik-turun halus)
         this.tweens.add({
             targets: this.wizard,
-            y: this.wizard.y - 10,
-            duration: 1500,
+            y: this.wizard.y - 20,
+            duration: 1000,
             yoyo: true,
             repeat: -1,
             ease: 'Sine.easeInOut'
@@ -311,6 +339,11 @@ export class GameScene extends Phaser.Scene {
         const enemyTemplate = Phaser.Utils.Array.GetRandom(this.level.enemies);
         const enemyStats = gameData.getEnemyFullData(enemyTemplate.id);
 
+        // Ambil kata dari data json
+        const jsonKey = enemyStats.library.jsonKey;
+        const wordList = this.cache.json.get(jsonKey);
+
+        const randomWord = Phaser.Utils.Array.GetRandom(wordList);
         const spawnX = this.scale.width + 100;
         const groundY = this.scale.height - 180;
         let spawnY = groundY;
@@ -324,7 +357,7 @@ export class GameScene extends Phaser.Scene {
 
         // Buat objek musuh menggunakan Prefab (Enemy.js)
         const newEnemy = new Enemy(this, spawnX, spawnY, enemyStats);
-        newEnemy.targetWord = Phaser.Utils.Array.GetRandom(enemyStats.library.words);
+        newEnemy.targetWord = randomWord.toUpperCase(); // Pastikan Kapital
 
         this.enemies.add(newEnemy); // Masukkan ke grup agar bisa diupdate bersama
         this.refreshVisuals();
@@ -338,10 +371,68 @@ export class GameScene extends Phaser.Scene {
 
         // Gerakkan semua musuh ke arah penyihir
         this.enemies.getChildren().forEach(enemy => {
-            enemy.move();
+            // 1. Tentukan batas berhenti tembak (misal di x=600)
+            const stopDistance = 600;
+
+            if (enemy.stats.enemyCategory === "FarAttack" && enemy.x <= stopDistance) {
+                // Berhenti jalan dan mulai menembak jika belum menembak
+                if (!enemy.isAttacking) {
+                    this.enemyShoot(enemy);
+                }
+            } else {
+                // Musuh maju jika tipe Direct atau belum sampai batas
+                enemy.move();
+            }
+
             // Jika musuh sampai di garis pertahanan (x=260)
             if (enemy.x <= 260) {
                 this.takeDamage(enemy);
+            }
+        });
+    }
+
+    /**
+     * [ENEMY SHOOT] Fungsi untuk membuat musuh menembakkan kekuatannya.
+     */
+    enemyShoot(enemy) {
+        enemy.isAttacking = true; // Penanda agar tidak menembak ribuan kali sekaligus
+
+        // Ambil kunci aset dari data musuh
+        const vfxKey = enemy.stats.attackVFX;
+        if (!vfxKey) return;
+
+        // 1. Buat proyektil (Misal menggunakan video/gif yang kamu load)
+        // Kita gunakan sprite biasa tapi texture-nya dari vfxKey
+        const projectile = this.add.video(enemy.x, enemy.y, vfxKey);
+
+        // 2. Mainkan videonya
+        projectile.play(true); // 'true' berarti videonya looping selama terbang
+        projectile.setScale(0.5); // Sesuaikan ukuran video agar tidak menutupi layar
+
+        // 3. Tembakkan ke arah penyihir (ke kiri)
+        this.tweens.add({
+            targets: projectile,
+            x: this.wizard.x,
+            y: this.wizard.y,
+            duration: 800, // Kecepatan tembakan
+            onComplete: () => {
+                // 4. Efek saat peluru kena penyihir
+                if (!this.state.isGameOver) {
+                    this.cameras.main.flash(200, 255, 0, 0, 0.3); // Kilatan merah
+                    this.reduceMana(enemy.stats.attackPower);    // Kurangi darah
+
+                    // Suara saat terkena tembakan
+                    if (this.cache.audio.exists('uncorrect')) {
+                        this.sound.play('uncorrect', { volume: 0.3 });
+                    }
+                }
+
+                projectile.destroy(); // Hapus peluru setelah kena
+
+                // Beri jeda 3 detik sebelum musuh menembak lagi
+                this.time.delayedCall(3000, () => {
+                    if (enemy.active) enemy.isAttacking = false;
+                });
             }
         });
     }

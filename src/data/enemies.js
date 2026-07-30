@@ -7,6 +7,7 @@ export const enemyLibrary = {
         imagePath: "images/enimies/Goblin_1.png", 
         enemyCategory: "DirectAttack", // Urusan Logika Serang
         movementType: "Ground",        // Urusan Logika Posisi/Ketinggian
+        attackVFX: "attack_vfx", // musuh Tidak punya peluru
         walkSpeed: 1
     },
     "goblin_mage": {
@@ -17,6 +18,7 @@ export const enemyLibrary = {
         imagePath: "images/enimies/Goblin_1.png",
         enemyCategory: "FarAttack",
         movementType: "Flying",        // Dia terbang!
+        attackVFX: "attack_vfx", //Menggunakan aset 'attack_vfx' yang load
         walkSpeed: 2
     },
     "dark_knight": {
@@ -27,6 +29,7 @@ export const enemyLibrary = {
         imagePath: "images/enimies/Goblin_1.png",
         enemyCategory: "DirectAttack",
         movementType: "Ground",
+        attackVFX: "attack_vfx", //Menggunakan aset 'attack_vfx' yang load
         walkSpeed: 3
     }
 };
