@@ -3,31 +3,34 @@ import Phaser from 'phaser';
 export default class Enemy extends Phaser.GameObjects.Container {
     constructor(scene, x, y, enemyData) {
         super(scene, x, y);
-        this.stats = enemyData;
+        this.stats = enemyData;   // Menyimpan data statistik musuh
+        this.isDying = false;      // Penanda sedang proses kedip mati
+        this.isStopped = false;    // Penanda sedang berhenti di depan penyihir
 
+        // Gaya tulisan mantra di atas kepala musuh
         const style = {
-            fontSize: '32px',
-            fontFamily: 'monospace',
-            fontWeight: 'bold',
-            backgroundColor: '#00000088',
-            padding: { x: 5, y: 4 }
+            fontSize: '32px', fontFamily: 'monospace', fontWeight: 'bold',
+            backgroundColor: '#00000088', padding: { x: 5, y: 4 }
         };
 
-        // 1. BUAT SEMUA ANAK OBJEK DULU
+        // 1. Membuat Teks Bayangan (Dasar Putih)
         this.textBg = scene.add.text(0, -65, '', style).setOrigin(0.5).setAlpha(0.5);
+        // 2. Membuat Teks Progres (Warna Hijau-Cyan)
         this.textFg = scene.add.text(0, -65, '', { ...style, backgroundColor: null }).setOrigin(0.5).setColor('#00ffcc');
+        
+        // 3. Gambar Musuh
         this.sprite = scene.add.image(0, 0, enemyData.sprite).setScale(0.2);
-        this.sprite.setFlipX(true); //balik images
+        this.sprite.setFlipX(true); // Menghadap ke kiri (arah penyihir)
 
-        // 2. MASUKKAN KE DALAM CONTAINER
+        // 4. Masukkan elemen ke Container
         this.add([this.sprite, this.textBg, this.textFg]);
 
-        // 3. BARU JALANKAN ANIMASI (TWEEN)
+        // 5. Animasi melayang jika tipe Flying
         if (this.stats.movementType === "Flying") {
             scene.tweens.add({
                 targets: this,
-                y: y - 25, // Melayang naik sejauh 25px
-                duration: 1200 + Math.random() * 800, // Durasi acak biar ga barengan geraknya
+                y: y - 25, 
+                duration: 1200 + Math.random() * 800,
                 yoyo: true,
                 repeat: -1,
                 ease: 'Sine.easeInOut'
@@ -37,37 +40,58 @@ export default class Enemy extends Phaser.GameObjects.Container {
         scene.add.existing(this);
     }
 
+    /**
+     * [UPDATE VISUALS] Mengatur tampilan teks saat diketik.
+     * Memperbaiki error totalW is not defined.
+     */
     updateVisuals(targetWord, currentIndex) {
-        if (!this.active) return;
+        if (!this.active || this.isDying) return;
 
         const typed = targetWord.substring(0, currentIndex);
         this.textBg.setText(targetWord);
         this.textFg.setText(typed);
 
-        // Kita tumpuk FG tepat di atas BG
-        const totalW = this.textBg.width;
+        // --- FIX: Tambahkan 'const' agar tidak ReferenceError ---
+        const totalW = this.textBg.width; 
         const startX = -(totalW / 2);
 
         this.textBg.setOrigin(0, 0.5).setX(startX);
         this.textFg.setOrigin(0, 0.5).setX(startX);
     }
 
+    /**
+     * [MOVE] Musuh jalan hanya jika tidak mati dan tidak sedang tertahan (stop).
+     */
     move() {
-        this.x -= this.stats.walkSpeed;
+        if (!this.isDying && !this.isStopped) {
+            this.x -= this.stats.walkSpeed;
+        }
     }
 
-    die() {
-        this.active = false //fungsi move agar musuh berhenti jalan saat sedang kedip
+    /**
+     * [STOP] Menahan musuh agar diam di tempat.
+     */
+    stop() {
+        this.isStopped = true;
+    }
 
+    /**
+     * [DIE] Efek kedip 3x sebelum hancur. Dipanggil saat jawaban BENAR.
+     */
+    die() {
+        if (this.isDying) return;
+        this.isDying = true;
+
+        // Animasi kedip (Flicker)
         this.scene.tweens.add({
             targets: this,
-            alpha: 0, //berubah jadi transparant
-            duration: 100, //kecepatan kedipnya 1 detik
-            repeat: 3, // ulangi kedip 3x
-            yoyo: true, //looping muncul-hilang
+            alpha: 0,
+            duration: 100,
+            repeat: 3,
+            yoyo: true,
             onComplete: () => {
-                this.destroy(); //setelah kedip selesai baru destroy hapus dari game
+                this.destroy(); // Hapus selamanya dari game
             }
-        })
+        });
     }
 }
