@@ -34,7 +34,11 @@ export class GameScene extends Phaser.Scene {
             currentIndex: 0,       // Huruf yang sedang diketik
             defeatedCount: 0,      // Musuh yang sudah dikalahkan
             timeLeft: this.level.timeTarget, // Waktu mundur level
-            isGameOver: false      // Status permainan
+            isGameOver: false,     // Status permainan
+            totalCharsTyped: 0, // Total huruf yang diketik pemain
+            totalWordsTyped: 0,   // Total kata yang diketik pemain
+            gameStartTime: 0, // Waktu mulai level (dalam milidetik)
+            isStarted: false // Penanda level sudah dimulai
         };
 
         this.targetEnemy = null;   // Musuh yang sedang dikunci/diketik
@@ -63,8 +67,8 @@ export class GameScene extends Phaser.Scene {
         this.load.audio('boom', 'music/boom.mp3');
         this.load.audio('bgm_music', 'music/background-music.mp3');
 
-        // Aset Video Serangan
-        this.load.video('attack_vfx', 'video/attack.mp4');
+        // Aset foto Serangan
+        this.load.image('attack_vfx', 'images/weaponry/Waterball.png');
 
         // Memuat semua musuh yang ada di level ini
         this.level.enemies.forEach(enemy => {
@@ -167,11 +171,18 @@ export class GameScene extends Phaser.Scene {
      * [HANDLE TYPING] Mendeteksi input keyboard pemain.
      */
     handleTyping(event) {
+        //jika permainan sudah berakhir, hentikan logika ini
         if (this.state.isGameOver) return;
         const char = event.key.toUpperCase();
-        if (char.length > 1) return;
+        if (char.length > 1) return; //jika panjang karakter lebih dari 1, hentikan logika ini (untuk tombol seperti Shift, Enter, dll)
 
-        let isCorrectKey = false;
+        let isCorrectKey = false; // set false terlebih dahulu, nanti akan diubah menjadi true jika benar
+
+        //jika permainan belum dimulai, catat waktu mulai level saat pemain mengetik huruf pertama
+        if (!this.state.isStarted) {
+            this.state.isStarted = true;
+            this.state.gameStartTime = this.time.now; // Catat waktu mulai level
+        }
 
         // Jika belum ada target yang sedang diketik
         if (!this.targetEnemy) {
@@ -184,6 +195,9 @@ export class GameScene extends Phaser.Scene {
                 this.state.currentIndex = 1;
                 this.typingBar.triggerLockOn();
                 this.typingBar.triggerHit();
+
+                this.state.totalCharsTyped++; // Tambah total huruf yang diketik
+                this.state.totalWordsTyped++; // Tambah total kata yang diketik
                 isCorrectKey = true;
             } else {
                 this.typingBar.triggerInvalid();
@@ -196,6 +210,9 @@ export class GameScene extends Phaser.Scene {
                 this.state.currentIndex++;
                 this.typingBar.triggerHit();
                 this.createTypingParticle(this.input.x, this.input.y);
+
+                this.state.totalCharsTyped++; // Tambah total huruf yang diketik
+                this.state.totalWordsTyped++; // Tambah total kata yang diketik
                 isCorrectKey = true;
             } else {
                 this.applyPenalty();
@@ -211,6 +228,8 @@ export class GameScene extends Phaser.Scene {
         // Jika satu kata selesai: Musuh baru boleh mati
         if (this.targetEnemy && this.state.currentIndex === this.targetEnemy.targetWord.length) {
             this.sound.play('correct', { volume: 0.6 });
+
+            this.state.totalWordsTyped++;
             this.resolveCombat(true);
             this.targetEnemy = null;
             this.state.currentIndex = 0;
@@ -272,8 +291,21 @@ export class GameScene extends Phaser.Scene {
         this.sound.play('boom', { volume: 0.3 });
         this.reduceMana(enemy.stats.attackPower);
 
+        //apakah musuh yang sedang kita ketik ini masih hidup? jika iya, maka kita reset targetEnemy dan currentIndex agar pemain bisa mengetik musuh lain
+        if (this.targetEnemy === enemy) {
+            this.targetEnemy = null; // Reset target musuh karena musuh ini sudah menyerang
+            this.state.currentIndex = 0; // Reset indeks pengetikan karena musuh mati
+
+            if (this.cache.audio.exists('uncorrect')) {
+                this.sound.play('uncorrect', { volume: 0.4 });
+            }
+        }
+
         //setelah menyerang musuh langsung menjalankan fungsi die() kedip untuk menghilangkan musuh dari permainan
         enemy.die(); // Musuh mati setelah menyerang
+
+        //refresh visual untuk memperbarui tampilan bar pengetikan dan musuh
+        this.refreshVisuals();
     }
 
     /**
@@ -315,8 +347,8 @@ export class GameScene extends Phaser.Scene {
             }
 
             // 2. FIX: LOGIKA STANDOFF (Garis Pertahanan)
-            // KUNCI: Kita buat target berhenti bervariasi agar tidak tumpuk sempurna (350 + index * 10)
-            const stopPoint = 350 + (index * 15);
+            // KUNCI: Kita buat target berhenti bervariasi agar tidak tumpuk sempurna (280 + index * 15)
+            const stopPoint = 280 + (index * 15);
 
             //jika enemy.x sudah sampai batas stopPoint, maka musuh akan berhenti dan menyiapkan serangan terakhir ke wizard.
             if (enemy.x <= stopPoint) {
@@ -324,10 +356,10 @@ export class GameScene extends Phaser.Scene {
                 if (!enemy.isPreparingStrike) {
                     enemy.isPreparingStrike = true; // musuh diam di tempat dan menyiapkan serangan terakhir
                     // Efek visual: Musuh berkedip merah sebelum menyerang
-                    enemy.sprite.setTint(0xffffff);
+                    enemy.sprite.setTint(0xff0000);
                     this.time.delayedCall(2000, () => { // Delay 2 detik sebelum menyerang
                         // Pastikan musuh masih ada (belum diketik mati oleh pemain)
-                        if (enemy.active && !enemy.isDying) {
+                        if (enemy.active && !enemy.isDying && !this.state.isGameOver) {
                             this.handleContactDamage(enemy); // Pukul Wizard lalu mati (die)
                         }
                     });
@@ -344,8 +376,8 @@ export class GameScene extends Phaser.Scene {
     enemyShoot(enemy) {
         if (!enemy.active || enemy.isDying) return;
         enemy.isAttacking = true;
-        const projectile = this.add.video(enemy.x, enemy.y, 'attack_vfx');
-        projectile.play(true).setScale(0.5);
+        const projectile = this.add.image(enemy.x, enemy.y, 'attack_vfx');
+        projectile.setScale(0.2);
 
         this.tweens.add({
             targets: projectile, x: this.wizard.x, y: this.wizard.y, duration: 1500,
@@ -389,18 +421,49 @@ export class GameScene extends Phaser.Scene {
         else if (this.state.timeLeft <= 0) this.endGame(false);
     }
 
+    /** 
+     * [CALCULATE WPM] Menghitung kecepatan mengetik pemain.
+     * Rumus: WPM = (Total Kata / Total Menit) = (totalWordsTyped / (elapsedTimeInSeconds / 60))
+     */
+
+    calculateWPM() {
+        //Hitung total detik yang telah berlalu sejak level dimulai
+        const totalTimeSeconds = (this.time.now - this.state.gameStartTime) / 1000;
+        const minutes = totalTimeSeconds / 60;
+
+        //jika waktu kurang dari atau sama dengan 0 atau total huruf yang diketik adalah 0, maka WPM = 0    
+        if (minutes <= 0 || this.state.totalCharsTyped === 0) return 0;
+
+        //rumus WPM (karakter diketik / 5) / menit
+        const wpm = (this.state.totalCharsTyped / 5) / minutes;
+        return Math.round(wpm); // Bulatkan ke angka terdekat
+
+        // Jika ingin menggunakan total kata yang diketik, gunakan baris berikut:
+        // const wpm = this.state.totalWordsTyped / minutes;
+        // return Math.round(wpm);
+    }
+
     /**
      * [END GAME] Berhenti dan panggil Pop-up.
      */
     endGame(isSuccess) {
         if (this.state.isGameOver) return;
         this.state.isGameOver = true;
+
+        //hitung WPM saat permainan berakhir
+        const finalWPM = this.calculateWPM();
+
+        //hitung akurasi benar atau salah (jika total huruf yang diketik lebih dari 0, maka akurasi = (total kata yang diketik / total huruf yang diketik) * 100)
+        const totalAttempts = this.state.totalCharsTyped + (this.state.defeatedCount * 2); // contoh hitungan
+        const accuracy = Math.round((this.state.totalCharsTyped / (this.state.totalCharsTyped + (this.state.score / 10))) * 100) || 0;
+
         if (!isSuccess) this.wizard.setTexture('wizard_dead');
         if (this.spawnTimer) this.spawnTimer.remove();
         if (this.levelTimer) this.levelTimer.remove();
         this.enemies.clear(true, true);
+
         if (isSuccess && this.cache.audio.exists('sparkle')) this.sound.play('sparkle', { volume: 0.8 });
-        this.scene.launch('ResultScene', { isWin: isSuccess, score: this.state.score, levelIndex: this.currentLevelIndex });
+        this.scene.launch('ResultScene', { isWin: isSuccess, score: this.state.score, levelIndex: this.currentLevelIndex, wpm: finalWPM, accuracy: accuracy > 100 ? 100 : accuracy, defeated: this.state.defeatedCount });
         this.scene.pause();
     }
 
