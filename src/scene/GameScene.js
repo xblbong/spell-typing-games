@@ -97,9 +97,9 @@ export class GameScene extends Phaser.Scene {
         this.typingBar = new TypingBar(this, width / 2, height - 55);
 
         // 4. Sistem Muncul Musuh (Spawn)
-        this.spawnEnemy(); 
+        this.spawnEnemy();
         this.spawnTimer = this.time.addEvent({
-            delay: 3000, 
+            delay: 3000,
             callback: () => this.spawnEnemy(),
             loop: true
         });
@@ -211,7 +211,7 @@ export class GameScene extends Phaser.Scene {
         // Jika satu kata selesai: Musuh baru boleh mati
         if (this.targetEnemy && this.state.currentIndex === this.targetEnemy.targetWord.length) {
             this.sound.play('correct', { volume: 0.6 });
-            this.resolveCombat(true); 
+            this.resolveCombat(true);
             this.targetEnemy = null;
             this.state.currentIndex = 0;
         }
@@ -237,7 +237,7 @@ export class GameScene extends Phaser.Scene {
 
             // Visual: Musuh Kedip Mati
             this.sound.play('boom', { volume: 0.5 });
-            this.targetEnemy.die(); 
+            this.targetEnemy.die();
             this.cameras.main.flash(100, 0, 255, 200, 0.2);
         }
         this.updateUI();
@@ -265,10 +265,15 @@ export class GameScene extends Phaser.Scene {
      * [HANDLE CONTACT DAMAGE] Musuh tertahan dan memukul wizard.
      */
     handleContactDamage(enemy) {
+        //jika permainan sudah berakhir, hentikan logika ini
         if (this.state.isGameOver) return;
+        // dimana camera akan berkedip merah, suara ledakan, dan mengurangi mana pemain
         this.cameras.main.flash(200, 255, 0, 0, 0.5);
         this.sound.play('boom', { volume: 0.3 });
         this.reduceMana(enemy.stats.attackPower);
+
+        //setelah menyerang musuh langsung menjalankan fungsi die() kedip untuk menghilangkan musuh dari permainan
+        enemy.die(); // Musuh mati setelah menyerang
     }
 
     /**
@@ -284,8 +289,8 @@ export class GameScene extends Phaser.Scene {
 
         // FIX: Spacing lebih acak agar tidak keluar layar sekaligus atau tumpang tindih
         const spawnX = this.scale.width + Phaser.Math.Between(100, 300);
-        const groundY = this.scale.height - 180; 
-        
+        const groundY = this.scale.height - 180;
+
         let spawnY = (enemyStats.movementType === "Flying") ? groundY - Phaser.Math.Between(150, 350) : groundY + Phaser.Math.Between(-5, 20);
 
         const newEnemy = new Enemy(this, spawnX, spawnY, enemyStats);
@@ -299,24 +304,33 @@ export class GameScene extends Phaser.Scene {
      */
     update() {
         if (this.state.isGameOver) return;
-        
+
         const children = this.enemies.getChildren();
         children.forEach((enemy, index) => {
             if (!enemy.active || enemy.isDying) return;
 
-            // 1. Logika Serangan FarAttack
+            // 1. Logika Serangan FarAttack jika musuh tipe ini sudah sampai batas tertentu, maka musuh akan menembakkan proyektil ke wizard. Kita cek apakah musuh sudah menyerang atau belum.
             if (enemy.stats.enemyCategory === "FarAttack" && !enemy.isAttacking) {
                 this.enemyShoot(enemy);
             }
 
             // 2. FIX: LOGIKA STANDOFF (Garis Pertahanan)
             // KUNCI: Kita buat target berhenti bervariasi agar tidak tumpuk sempurna (350 + index * 10)
-            const stopPoint = 350 + (index * 15); 
-            
+            const stopPoint = 350 + (index * 15);
+
+            //jika enemy.x sudah sampai batas stopPoint, maka musuh akan berhenti dan menyiapkan serangan terakhir ke wizard.
             if (enemy.x <= stopPoint) {
-                if (!enemy.isStopped) {
-                    enemy.stop(); // Musuh diam di tempat
-                    this.handleContactDamage(enemy); // Kena damage pertama
+                //Jika musuh sudah menyiapkan serangan dan belum menyerang, maka musuh akan menyerang wizard setelah 2 detik. Jika musuh sudah menyerang, maka tidak akan menyerang lagi.
+                if (!enemy.isPreparingStrike) {
+                    enemy.isPreparingStrike = true; // musuh diam di tempat dan menyiapkan serangan terakhir
+                    // Efek visual: Musuh berkedip merah sebelum menyerang
+                    enemy.sprite.setTint(0xffffff);
+                    this.time.delayedCall(2000, () => { // Delay 2 detik sebelum menyerang
+                        // Pastikan musuh masih ada (belum diketik mati oleh pemain)
+                        if (enemy.active && !enemy.isDying) {
+                            this.handleContactDamage(enemy); // Pukul Wizard lalu mati (die)
+                        }
+                    });
                 }
             } else {
                 enemy.move(); // Musuh maju jika belum sampai batas
