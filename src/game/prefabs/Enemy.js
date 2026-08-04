@@ -6,6 +6,7 @@ export default class Enemy extends Phaser.GameObjects.Container {
         this.stats = enemyData;   // Menyimpan data statistik musuh
         this.isDying = false;      // Penanda sedang proses kedip mati
         this.isStopped = false;    // Penanda sedang berhenti di depan penyihir
+        this.isPreparingStrike = false; // Penanda sedang menyiapkan serangan (untuk tipe Strike)
 
         // Gaya tulisan mantra di atas kepala musuh
         const style = {
@@ -63,8 +64,9 @@ export default class Enemy extends Phaser.GameObjects.Container {
      * [MOVE] Musuh jalan hanya jika tidak mati dan tidak sedang tertahan (stop).
      */
     move() {
-        if (!this.isDying && !this.isStopped) {
-            this.x -= this.stats.walkSpeed;
+        //jika musuh tidak mati, tidak berhenti, dan tidak sedang menyiapkan serangan, maka musuh akan bergerak ke kiri
+        if (!this.isDying && !this.isStopped && !this.isPreparingStrike) {
+            this.x -= this.stats.walkSpeed; // this.x -= this.stats.walkSpeed; // Menggerakkan musuh ke kiri sesuai kecepatan berjalan
         }
     }
 
