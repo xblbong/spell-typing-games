@@ -227,12 +227,22 @@ export class GameScene extends Phaser.Scene {
 
         // Jika satu kata selesai: Musuh baru boleh mati
         if (this.targetEnemy && this.state.currentIndex === this.targetEnemy.targetWord.length) {
+            // Kita jalankan refreshVisuals dulu agar huruf terakhir sempat berubah HIJAU/CYAN
+            this.refreshVisuals();
+
             this.sound.play('correct', { volume: 0.6 });
 
-            this.state.totalWordsTyped++;
-            this.resolveCombat(true);
-            this.targetEnemy = null;
-            this.state.currentIndex = 0;
+            //kasih jeda sedikit sebelum musuh mati agar efek visual huruf terakhir sempat terlihat
+            this.time.delayedCall(100, () => {
+                if (this.targetEnemy) {
+                    this.resolveCombat(true);
+                    this.targetEnemy = null;
+                    this.state.currentIndex = 0;
+                    this.refreshVisuals();
+                }
+            });
+
+            return; // Hentikan logika di sini agar tidak memanggil refreshVisuals dua kali
         }
         this.refreshVisuals();
     }
