@@ -7,67 +7,76 @@ export class ResultScene extends Phaser.Scene {
     }
 
     init(data) {
+        // Menerima data dari GameScene: isWin, score, levelIndex, wpm, accuracy, perfect, errors
         this.resultData = data; 
     }
 
     create() {
         const { width, height } = this.scale;
 
-        // 1. OVERLAY: Membuat latar belakang gelap transparan
+        // 1. OVERLAY: Latar belakang gelap transparan
         this.add.rectangle(0, 0, width, height, 0x000000, 0.8).setOrigin(0);
 
-        // 2. CONTAINER UTAMA: Semua elemen modal ditaruh di sini
+        // 2. CONTAINER UTAMA: Wadah modal agar semua elemen bergerak bersama
         const modal = this.add.container(width / 2, height / 2);
 
-        // 3. BACKGROUND MODAL: Kotak utama dengan sudut melengkung
+        // 3. BACKGROUND MODAL: Kotak putih utama (Tinggi diset 600 agar muat semua statistik)
         const bg = this.add.graphics();
         bg.fillStyle(0xffffff, 1); 
-        bg.fillRoundedRect(-250, -280, 500, 560, 30); // Kotak lebih tinggi
+        bg.fillRoundedRect(-250, -300, 500, 600, 30); 
         modal.add(bg);
 
-        // 4. HEADER: Bagian atas modal (Warna Ungu/Gelap)
+        // 4. HEADER: Bagian atas modal (Warna Ungu jika menang, Merah jika kalah)
         const header = this.add.graphics();
         header.fillStyle(this.resultData.isWin ? 0x7b56ff : 0xff4d6d, 1);
-        header.fillRoundedRect(-250, -280, 500, 80, { tl: 30, tr: 30, bl: 0, br: 0 });
+        header.fillRoundedRect(-250, -300, 500, 80, { tl: 30, tr: 30, bl: 0, br: 0 });
         modal.add(header);
 
-        const title = this.add.text(0, -240, 
-            this.resultData.isWin ? 'LEVEL COMPLETE!' : 'BATTLE LOST', 
-            { fontSize: '28px', fontWeight: 'bold', color: '#ffffff', fontFamily: 'monospace' }
-        ).setOrigin(0.5);
-        modal.add(title);
+        const titleText = this.resultData.isWin ? 'MISSION CLEARED!' : 'BATTLE LOST';
+        modal.add(this.add.text(0, -260, titleText, { 
+            fontSize: '28px', fontWeight: 'bold', color: '#ffffff', fontFamily: 'monospace' 
+        }).setOrigin(0.5));
 
-        // 5. MAGE RANK: Judul tambahan biar seperti RPG (Mage Level)
-        const rankText = this.add.text(0, -170, 'MAGE RANK: SEEDLING', {
-            fontSize: '18px', color: '#4a3b52', fontWeight: 'bold', fontFamily: 'monospace'
-        }).setOrigin(0.5);
-        modal.add(rankText);
+        // 5. PANGGIL KONTEN STATISTIK (Di sinilah fungsi yang kamu tanyakan dipanggil)
+        this.createContent(modal);
 
-        // 6. STATS GRID: Menampilkan WPM dan Akurasi berdampingan
-        this.createStatBlock(modal, -110, -100, 'SPEED', `${this.resultData.wpm}`, 'WPM', 0x75d94d);
-        this.createStatBlock(modal, 110, -100, 'ACCURACY', `${this.resultData.accuracy}`, '%', 0x00d2ff);
+        // 6. PANGGIL XP BAR (Visual kemajuan rank)
+        this.createXPBar(modal, 180);
 
-        // 7. COIN REWARD: Menampilkan koin dengan icon
-        const coinBox = this.add.graphics();
-        coinBox.fillStyle(0xf8f9fa, 1);
-        coinBox.fillRoundedRect(-180, 20, 360, 60, 15);
-        modal.add(coinBox);
-
-        const coinLabel = this.add.text(-160, 50, '🪙 Coins Earned:', { fontSize: '18px', color: '#4a3b52' }).setOrigin(0, 0.5);
-        const coinVal = this.add.text(160, 50, `+${this.resultData.score}`, { 
-            fontSize: '24px', fontWeight: 'bold', color: '#e6b800' 
-        }).setOrigin(1, 0.5);
-        modal.add([coinLabel, coinVal]);
-
-        // 8. PROGRESS BAR: Meniru referensi gambar kamu (XP bar)
-        this.createXPBar(modal, 120);
-
-        // 9. TOMBOL UTAMA
-        this.createMainButton(modal, 210);
+        // 7. PANGGIL TOMBOL UTAMA (Claim / Retry)
+        this.createMainButton(modal, 260);
     }
 
     /**
-     * FUNGSI PEMBANTU: Membuat kotak statistik (WPM/Accuracy)
+     * [CREATE CONTENT] 
+     * Inilah tempat fungsi yang kamu tanyakan tadi diletakkan.
+     */
+    createContent(container) {
+        // A. Tampilkan Statistik Grid (WPM & Accuracy) di bagian atas
+        this.createStatBlock(container, -110, -140, 'SPEED', `${this.resultData.wpm || 0}`, 'WPM', 0x75d94d);
+        this.createStatBlock(container, 110, -140, 'ACCURACY', `${this.resultData.accuracy || 0}`, '%', 0x00d2ff);
+
+        // B. LAPORAN EVALUASI MANTRA (Perfect vs Fumbles)
+        const reportStyle = { fontSize: '18px', fontFamily: 'monospace', color: '#4a3b52', fontWeight: 'bold' };
+        
+        const perfectTxt = this.add.text(0, -30, `✨ Perfect Casts: ${this.resultData.perfect || 0}`, reportStyle).setOrigin(0.5);
+        const errorTxt = this.add.text(0, 5, `💥 Mana Fumbles: ${this.resultData.errors || 0}`, reportStyle).setOrigin(0.5);
+        
+        // C. Koin Reward Box (Bagian Abu-abu)
+        const coinBox = this.add.graphics();
+        coinBox.fillStyle(0xf8f9fa, 1);
+        coinBox.fillRoundedRect(-180, 80, 360, 60, 15);
+        
+        const coinVal = this.add.text(0, 110, `🪙 Coins Earned: +${this.resultData.score}`, { 
+            fontSize: '22px', fontWeight: 'bold', color: '#e6b800' 
+        }).setOrigin(0.5);
+
+        // Masukkan elemen-elemen ke dalam kontainer modal
+        container.add([coinBox, perfectTxt, errorTxt, coinVal]);
+    }
+
+    /**
+     * [STAT BLOCK] Membuat angka statistik besar (WPM / Accuracy)
      */
     createStatBlock(container, x, y, label, value, unit, color) {
         const valText = this.add.text(x, y, value, { 
@@ -86,26 +95,19 @@ export class ResultScene extends Phaser.Scene {
     }
 
     /**
-     * FUNGSI PEMBANTU: Membuat Bar Progress XP
+     * [XP BAR] Membuat visual progress level
      */
     createXPBar(container, y) {
         const barW = 360;
-        const bgBar = this.add.graphics();
-        bgBar.fillStyle(0xeeeeee, 1);
-        bgBar.fillRoundedRect(-barW/2, y, barW, 20, 10);
-
-        const fillBar = this.add.graphics();
-        fillBar.fillStyle(0x7b56ff, 1);
-        // Persentase random buat gaya (60%)
-        fillBar.fillRoundedRect(-barW/2, y, barW * 0.6, 20, 10);
-        
-        const xpText = this.add.text(0, y + 35, '2,500 XP to next rank', { fontSize: '12px', color: '#888' }).setOrigin(0.5);
+        const bgBar = this.add.graphics().fillStyle(0xeeeeee, 1).fillRoundedRect(-barW/2, y, barW, 20, 10);
+        const fillBar = this.add.graphics().fillStyle(0x7b56ff, 1).fillRoundedRect(-barW/2, y, barW * 0.7, 20, 10);
+        const xpText = this.add.text(0, y + 35, 'Keep practicing to unlock Master Rank!', { fontSize: '12px', color: '#888' }).setOrigin(0.5);
         
         container.add([bgBar, fillBar, xpText]);
     }
 
     /**
-     * FUNGSI PEMBANTU: Membuat Tombol Utama (Claim/Retry)
+     * [MAIN BUTTON] Membuat tombol Claim atau Retry
      */
     createMainButton(container, y) {
         const isWin = this.resultData.isWin;
@@ -115,17 +117,13 @@ export class ResultScene extends Phaser.Scene {
         const btn = this.add.container(0, y);
         const bg = this.add.rectangle(0, 0, 360, 70, btnColor).setInteractive({ useHandCursor: true });
         bg.setStrokeStyle(4, 0xffffff);
-
-        const txt = this.add.text(0, 0, btnText, { 
-            fontSize: '22px', fontWeight: 'bold', color: '#ffffff' 
-        }).setOrigin(0.5);
+        const txt = this.add.text(0, 0, btnText, { fontSize: '22px', fontWeight: 'bold', color: '#ffffff' }).setOrigin(0.5);
 
         btn.add([bg, txt]);
         container.add(btn);
 
-        // Animasi klik & Logika Pindah
         bg.on('pointerdown', () => {
-            this.sound.play('keyboard'); // Pake sound yang ada aja buat feedback
+            this.sound.play('keyboard'); 
             if (isWin) {
                 gameData.getUser().userCoins += this.resultData.score;
                 this.scene.stop('GameScene');
@@ -137,7 +135,6 @@ export class ResultScene extends Phaser.Scene {
             this.scene.stop();
         });
 
-        // Hover Effect
         bg.on('pointerover', () => bg.setAlpha(0.8));
         bg.on('pointerout', () => bg.setAlpha(1));
     }

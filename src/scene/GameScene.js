@@ -35,10 +35,17 @@ export class GameScene extends Phaser.Scene {
             defeatedCount: 0,      // Musuh yang sudah dikalahkan
             timeLeft: this.level.timeTarget, // Waktu mundur level
             isGameOver: false,     // Status permainan
+
+            // Statistik tambahan untuk hasil akhir WPM & Akurasi
             totalCharsTyped: 0, // Total huruf yang diketik pemain
             totalWordsTyped: 0,   // Total kata yang diketik pemain
             gameStartTime: 0, // Waktu mulai level (dalam milidetik)
-            isStarted: false // Penanda level sudah dimulai
+            isStarted: false, // Penanda level sudah dimulai
+
+            //Statistik Evaluasi Penyihir
+            spellsPerfect: 0, // Hitungan setiap satu kata selesai tanpa salah ketik sama sekali
+            totalErrors: 0,   // Hitungan setiap kali fungsi applyPenalty() dipanggil
+            isCurrentWordPerfect: true // Penanda apakah kata yang sedang diketik ini sempurna atau tidak
         };
 
         this.targetEnemy = null;   // Musuh yang sedang dikunci/diketik
@@ -193,6 +200,7 @@ export class GameScene extends Phaser.Scene {
             if (candidates.length > 0) {
                 this.targetEnemy = candidates[0];
                 this.state.currentIndex = 1;
+                this.state.isCurrentWordPerfect = true; // Reset penanda kata sempurna
                 this.typingBar.triggerLockOn();
                 this.typingBar.triggerHit();
 
@@ -201,6 +209,7 @@ export class GameScene extends Phaser.Scene {
                 isCorrectKey = true;
             } else {
                 this.typingBar.triggerInvalid();
+                this.state.totalErrors++; // Tambah total kesalahan ketik
                 this.cameras.main.flash(100, 255, 0, 0, 0.2);
                 this.sound.play('uncorrect', { volume: 0.4 });
             }
@@ -215,12 +224,15 @@ export class GameScene extends Phaser.Scene {
                 this.state.totalWordsTyped++; // Tambah total kata yang diketik
                 isCorrectKey = true;
             } else {
+                this.state.isCurrentWordPerfect = false; // Tandai kata ini tidak sempurna
+                this.state.totalErrors++; // Tambah total kesalahan ketik
                 this.applyPenalty();
                 this.typingBar.triggerMiss();
                 this.sound.play('uncorrect', { volume: 0.4 });
             }
         }
 
+        // Jika pemain menekan tombol yang benar, mainkan efek suara keyboard dengan variasi detune
         if (isCorrectKey) {
             this.sound.play('keyboard', { volume: 0.5, detune: Phaser.Math.Between(-100, 100) });
         }
@@ -235,6 +247,9 @@ export class GameScene extends Phaser.Scene {
             //kasih jeda sedikit sebelum musuh mati agar efek visual huruf terakhir sempat terlihat
             this.time.delayedCall(100, () => {
                 if (this.targetEnemy) {
+                    //jika kata yang diketik sempurna, maka tambah hitungan kata sempurna
+                    if (this.state.isCurrentWordPerfect) this.state.spellsPerfect++; // Tambah hitungan kata sempurna
+
                     this.resolveCombat(true);
                     this.targetEnemy = null;
                     this.state.currentIndex = 0;
@@ -243,8 +258,9 @@ export class GameScene extends Phaser.Scene {
             });
 
             return; // Hentikan logika di sini agar tidak memanggil refreshVisuals dua kali
+        } else {
+            this.refreshVisuals();
         }
-        this.refreshVisuals();
     }
 
     /**
@@ -305,6 +321,7 @@ export class GameScene extends Phaser.Scene {
         if (this.targetEnemy === enemy) {
             this.targetEnemy = null; // Reset target musuh karena musuh ini sudah menyerang
             this.state.currentIndex = 0; // Reset indeks pengetikan karena musuh mati
+            this.refreshVisuals(); // Refresh visual agar bar pengetikan dan musuh diperbarui
 
             if (this.cache.audio.exists('uncorrect')) {
                 this.sound.play('uncorrect', { volume: 0.4 });
@@ -464,8 +481,8 @@ export class GameScene extends Phaser.Scene {
         const finalWPM = this.calculateWPM();
 
         //hitung akurasi benar atau salah (jika total huruf yang diketik lebih dari 0, maka akurasi = (total kata yang diketik / total huruf yang diketik) * 100)
-        const totalAttempts = this.state.totalCharsTyped + (this.state.defeatedCount * 2); // contoh hitungan
-        const accuracy = Math.round((this.state.totalCharsTyped / (this.state.totalCharsTyped + (this.state.score / 10))) * 100) || 0;
+        const totalAttempts = this.state.totalCharsTyped + this.state.totalErrors;
+        const accuracy = totalAttempts > 0 ? Math.round((this.state.totalCharsTyped / totalAttempts) * 100) : 0;
 
         if (!isSuccess) this.wizard.setTexture('wizard_dead');
         if (this.spawnTimer) this.spawnTimer.remove();
@@ -473,7 +490,16 @@ export class GameScene extends Phaser.Scene {
         this.enemies.clear(true, true);
 
         if (isSuccess && this.cache.audio.exists('sparkle')) this.sound.play('sparkle', { volume: 0.8 });
-        this.scene.launch('ResultScene', { isWin: isSuccess, score: this.state.score, levelIndex: this.currentLevelIndex, wpm: finalWPM, accuracy: accuracy > 100 ? 100 : accuracy, defeated: this.state.defeatedCount });
+        this.scene.launch('ResultScene', {
+            isWin: isSuccess,
+            score: this.state.score,
+            levelIndex: this.currentLevelIndex,
+            wpm: finalWPM,
+            accuracy: accuracy > 100 ? 100 : accuracy,
+            defeated: this.state.defeatedCount,
+            perfect: this.state.spellsPerfect,
+            errors: this.state.totalErrors
+        });
         this.scene.pause();
     }
 
