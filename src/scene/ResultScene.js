@@ -9,7 +9,7 @@ export class ResultScene extends Phaser.Scene {
     init(data) {
         // Menerima data dari GameScene: isWin, score, levelIndex, wpm, accuracy, perfect, errors
         this.resultData = data; 
-    }
+    }0
 
     create() {
         const { width, height } = this.scale;
