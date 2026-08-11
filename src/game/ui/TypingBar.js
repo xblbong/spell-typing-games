@@ -3,97 +3,129 @@ export default class TypingBar {
         this.scene = scene;
         this.centerX = x;
         this.centerY = y;
-        this.isLocked = false;
 
-        const style = { fontSize: '32px', fontFamily: 'monospace', fontWeight: 'bold' };
+        // Posisi Y yang lebih presisi untuk tengah perut bubble
+        const visualY = y - 10;
 
-        // 1. Background Box
-        this.bgBox = scene.add.graphics();
-        this.drawBackground(0x7b56ff); 
+        // 1. Gambar Bubble (Alpha sedikit dikurangi agar menyatu dengan background)
+        this.bubbleImage = scene.add.image(x, y, 'ui_typing_bubble')
+            .setScale(0.5)
+            .setDepth(10)
+            .setAlpha(0.95);
 
-        // 2. Hit Zone
-        this.hitZone = scene.add.rectangle(x, y, 500, 60, 0x000000, 0).setInteractive({ useHandCursor: true });
+        // 2. Gaya tulisan Minimalis & Modern
+        const commonStyle = {
+            fontSize: '22px', 
+            fontFamily: '"Trebuchet MS", Helvetica, Arial, sans-serif',
+            fontWeight: 'bold',
+        };
 
-        // 3. Teks Placeholder
-        this.placeholderText = scene.add.text(x, y, 'READY TO CAST...', style).setOrigin(0.5).setColor('#555555').setAlpha(0.5);
-        
-        // 4. Teks Bayangan (Background tulisan)
-        this.bgText = scene.add.text(x, y, '', style).setOrigin(0.5).setAlpha(0.15);
-        
-        // 5. Teks Foreground (Warna yang diketik benar)
-        // KUNCI: Gunakan #00ffff (Cyan terang) agar sesuai permintaanmu
-        this.fgText = scene.add.text(x, y, '', style).setOrigin(0.5).setColor('#00ffff');
-        
-        // 6. Kursor
-        this.cursor = scene.add.rectangle(x, y, 4, 35, 0x00ffff).setOrigin(0.5).setVisible(false);
+        // Placeholder: Abu-abu Lavender (Sangat soft)
+        this.placeholderText = scene.add.text(x, visualY, 'WAITING FOR SPELL...', commonStyle)
+            .setOrigin(0.5)
+            .setColor('#b2bec3') 
+            .setAlpha(0.6)
+            .setDepth(11);
 
-        this.setupAnimations();
+        // Background Text (Huruf belum diketik): Abu-abu terang (High Quality Grey)
+        this.bgText = scene.add.text(x, visualY, '', commonStyle)
+            .setOrigin(0.5)
+            .setColor('#d1d8e0') // Abu-abu sangat soft
+            .setDepth(11);
+
+        // Foreground Text (Huruf SUDAH diketik): Indigo Magis (Kontras tinggi)
+        this.fgText = scene.add.text(x, visualY, '', commonStyle)
+            .setOrigin(0.5)
+            .setColor('#4834d4') // Warna ungu indigo yang elegan
+            .setShadow(1, 1, 'rgba(0,0,0,0.1)', 2) // Shadow tipis agar teks "timbul"
+            .setDepth(12);
+
+        // Kursor: Tipis dan Elegan (Warna Ungu Muda)
+        this.cursor = scene.add.rectangle(x, visualY, 2, 28, 0x686de0)
+            .setOrigin(0.5)
+            .setVisible(false)
+            .setDepth(13);
+
+        // Animasi napas yang lebih halus (Slow & Smooth)
+        this.scene.tweens.add({
+            targets: this.bubbleImage,
+            scale: 0.52,
+            duration: 2000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+
+        // Animasi kursor berkedip (Blink)
+        this.scene.tweens.add({
+            targets: this.cursor,
+            alpha: 0,
+            duration: 500,
+            yoyo: true,
+            repeat: -1
+        });
     }
 
     drawBackground(color) {
-        this.bgBox.clear().fillStyle(0x000000, 0.7).lineStyle(3, color)
-            .fillRoundedRect(this.centerX - 250, this.centerY - 30, 500, 60, 12)
-            .strokeRoundedRect(this.centerX - 250, this.centerY - 30, 500, 60, 12);
-    }
-
-    setupAnimations() {
-        this.scene.tweens.add({ targets: this.bgBox, alpha: 0.6, duration: 1000, yoyo: true, repeat: -1 });
+        this.bubbleImage.setTint(color);
     }
 
     triggerLockOn() {
         this.isLocked = true;
-        this.drawBackground(0x00ffff); // Berubah warna Cyan saat mengunci musuh
+        // Beri tint biru sangat pudar (Soft Lavender) agar tidak mencolok
+        this.bubbleImage.setTint(0xeff5ff); 
     }
 
     triggerHit() {
-        this.scene.tweens.add({ targets: this.cursor, scaleY: 1.5, duration: 50, yoyo: true });
+        // Feedback visual kecil saat berhasil mengetik
+        this.scene.tweens.add({ 
+            targets: this.bubbleImage, 
+            scaleX: 0.53, 
+            duration: 50, 
+            yoyo: true 
+        });
     }
 
     triggerInvalid() {
-        this.drawBackground(0xff4d6d);
-        this.scene.time.delayedCall(200, () => this.drawBackground(this.isLocked ? 0x00ffff : 0x7b56ff));
+        // Merah pastel jika salah tekan (Lebih nyaman di mata dibanding merah solid)
+        this.drawBackground(0xffb8b8); 
+        this.scene.time.delayedCall(200, () => this.bubbleImage.clearTint());
     }
 
     triggerMiss() {
-        this.fgText.setColor('#ff4d6d');
-        this.scene.time.delayedCall(200, () => this.fgText.setColor('#00ffff'));
+        // Teks berubah jadi merah marun sebentar jika salah di tengah kata
+        this.fgText.setColor('#eb4d4b');
+        this.scene.time.delayedCall(200, () => this.fgText.setColor('#4834d4'));
     }
 
-    /**
-     * [UPDATE] 
-     * Fungsi untuk memperbarui tampilan teks secara real-time.
-     */
     update(word, index) {
-        // Jika tidak ada kata yang diketik
         if (!word || word === "") {
-            this.isLocked = false;
             this.placeholderText.setVisible(true);
             this.bgText.setText("");
             this.fgText.setText("");
             this.cursor.setVisible(false);
-            this.drawBackground(0x7b56ff);
+            this.bubbleImage.clearTint();
             return;
         }
 
-        // Jika sedang mengetik
         this.placeholderText.setVisible(false);
         this.cursor.setVisible(true);
-        
-        // Update isi teks
-        this.bgText.setText(word).updateText(); // Paksa update dimensi teks
+
+        this.bgText.setText(word);
         this.fgText.setText(word.substring(0, index));
 
-        // HITUNG POSISI PRESISI
-        // Kita hitung lebar total teks agar bisa ditaruh tepat di tengah bar
         const totalW = this.bgText.width;
+        const textY = this.centerY - 10; // Sesuaikan dengan visualY
         const startX = this.centerX - (totalW / 2);
 
-        // Kunci posisi teks agar rata kiri di dalam kalkulasi centering kita
-        this.bgText.setOrigin(0, 0.5).setPosition(startX, this.centerY);
-        this.fgText.setOrigin(0, 0.5).setPosition(startX, this.centerY);
+        this.bgText.setOrigin(0, 0.5).setPosition(startX, textY);
+        this.fgText.setOrigin(0, 0.5).setPosition(startX, textY);
 
-        // Update Posisi Kursor agar selalu di depan huruf terakhir
-        const charW = totalW / word.length;
-        this.cursor.setPosition(startX + (index * charW), this.centerY);
+        const typedPart = word.substring(0, index);
+        const tempText = this.scene.make.text({ style: this.fgText.style }).setText(typedPart);
+        const typedW = tempText.width;
+        tempText.destroy();
+
+        this.cursor.setPosition(startX + typedW + 2, textY);
     }
 }
