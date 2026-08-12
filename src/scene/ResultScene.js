@@ -37,11 +37,11 @@ export class ResultScene extends Phaser.Scene {
         this.add.rectangle(0, 0, width, height, 0x070a1a, 0.90).setOrigin(0);
 
         // 2. CONTAINER UTAMA (Pusat Modal di Tengah Layar)
-        const modal = this.add.container(width / 2, height / 2 - 15);
+        const modal = this.add.container(width / 2, height / 2 - 10);
 
-        // 3. FRAME LUAR (Panel Utama Space Blue)
-        const frameW = 440;
-        const frameH = 530;
+        // 3. FRAME LUAR (Tinggi ditingkatkan dari 530 ke 580 agar ada Padding)
+        const frameW = 450;
+        const frameH = 580;
 
         const frame = this.add.graphics();
         // Latar Frame Luar (Navy Space Blue)
@@ -58,7 +58,6 @@ export class ResultScene extends Phaser.Scene {
         // --- A. DEKORASI 4 SUDUT FRAME LUAR ---
         if (this.textures.exists('res_corner_outer')) {
             const outerCorners = [
-                // flipX = horizontal, flipY = vertikal
                 { x: -frameW / 2, y: -frameH / 2, angle: -180, flipX: true, flipY: false }, // Top-Left
                 { x: frameW / 2, y: -frameH / 2, angle: 180, flipX: false, flipY: false }, // Top-Right
                 { x: -frameW / 2, y: frameH / 2, angle: -180, flipX: true, flipY: true }, // Bottom-Left
@@ -68,23 +67,24 @@ export class ResultScene extends Phaser.Scene {
             outerCorners.forEach(pos => {
                 const cornerImg = this.add.image(pos.x, pos.y, 'res_corner_outer')
                     .setAngle(pos.angle)
-                    .setFlip(pos.flipX, pos.flipY) // <-- Pengaturan Horizontal (flipX) & Vertikal (flipY)
+                    .setFlip(pos.flipX, pos.flipY)
                     .setScale(0.85);
                 modal.add(cornerImg);
             });
         }
 
-        // --- B. IKON ATAS (Menang = Trofi, Kalah = Defeat Icon) ---
+        // --- B. IKON ATAS (💔 / 🏆) - Diturunkan sedikit agar tidak bocor dari border atas ---
         const isWin = this.resultData.isWin;
         const topIconKey = isWin ? 'res_trophy' : 'res_defeat';
 
         if (this.textures.exists(topIconKey)) {
-            const topIcon = this.add.image(0, -225, topIconKey).setScale(0.12);
+            // Skala disesuaikan & Y diturunkan ke -220 agar ada padding 40px dari border atas
+            const topIcon = this.add.image(0, -220, topIconKey).setScale(0.10);
             modal.add(topIcon);
         }
 
         // Teks Judul Kemenangan/Kekalahan
-        const titleText = this.add.text(0, -150, isWin ? 'VICTORY!' : 'DEFEATED!', {
+        const titleText = this.add.text(0, -145, isWin ? 'VICTORY!' : 'DEFEATED!', {
             fontSize: '36px',
             fontWeight: '900',
             color: '#ffffff',
@@ -94,9 +94,9 @@ export class ResultScene extends Phaser.Scene {
         }).setOrigin(0.5);
         modal.add(titleText);
 
-        // 4. INNER PANEL (Kotak Gelap Tengah untuk Statistik)
-        const innerW = 370;
-        const innerH = 265;
+        // 4. INNER PANEL (Diperbesar sedikit tinggi & lebarnya)
+        const innerW = 380;
+        const innerH = 275;
         const innerY = 25;
 
         const innerBg = this.add.graphics();
@@ -130,13 +130,13 @@ export class ResultScene extends Phaser.Scene {
 
         // 5. KONTEN ISI (Rank, Stats, Koin, XP, & Button)
         this.createContent(modal, innerY);
-        this.createXPBar(modal, 190);
-        this.createMainButton(modal, 280);
+        this.createXPBar(modal, 200);      // Digeser ke Y:200 agar ada jeda dari panel
+        this.createMainButton(modal, 290);  // Digeser ke Y:290 pas di bagian bawah frame
     }
 
     createContent(container, innerY) {
         // --- A. RANK BADGE ---
-        const rankY = innerY - 80;
+        const rankY = innerY - 85; // Digeser lebih atas sedikit
         const rankPill = this.add.graphics();
         rankPill.fillStyle(0x191e36, 1);
         rankPill.fillRoundedRect(-110, rankY - 18, 220, 36, 18);
@@ -154,7 +154,7 @@ export class ResultScene extends Phaser.Scene {
         container.add(rankText);
 
         // --- B. STATS BOX (Latar Merah Keunguan Gelap & Border Merah) ---
-        const statsY = innerY - 15;
+        const statsY = innerY - 10; // Posisi Tengah yang pas
         const boxH = 46;
         const boxW = 310;
         const radius = boxH / 2; // Capsule / Pill Shape (100% Rounded)
@@ -188,7 +188,7 @@ export class ResultScene extends Phaser.Scene {
         container.add(accVal);
 
         // --- C. REWARD KOIN ---
-        const coinY = innerY + 55;
+        const coinY = innerY + 65; // Digeser lebih bawah sedikit agar seimbang
         const coinPill = this.add.graphics();
         coinPill.fillStyle(0x191e36, 1);
         coinPill.fillRoundedRect(-90, coinY - 20, 180, 40, 20);
@@ -238,7 +238,7 @@ export class ResultScene extends Phaser.Scene {
             fillBar.fillRoundedRect(startX + cornerRadius / 2, y + barH - 2, lineW, 2, 1);
         }
 
-        const xpText = this.add.text(0, y + 28, '1,500 XP to next rank', {
+        const xpText = this.add.text(0, y + 26, '1,500 XP to next rank', {
             fontSize: '13px',
             color: '#a0aec0',
             fontFamily: 'monospace'
