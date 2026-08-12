@@ -10,7 +10,7 @@ export default class Enemy extends Phaser.GameObjects.Container {
 
         // Gaya tulisan mantra di atas kepala musuh
         const style = {
-            fontSize: '32px', fontFamily: 'monospace', fontWeight: 'bold',
+            fontSize: '24px', fontFamily: '"Press Start 2P", monospace', fontWeight: 'bold',
             backgroundColor: '#00000088', padding: { x: 5, y: 4 }
         };
 

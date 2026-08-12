@@ -15,27 +15,27 @@ export default class TypingBar {
 
         // 2. Gaya tulisan Minimalis & Modern
         const commonStyle = {
-            fontSize: '22px', 
-            fontFamily: '"Trebuchet MS", Helvetica, Arial, sans-serif',
+            fontSize: '12px', 
+            fontFamily: '"Press Start 2P", monospace, Arial, sans-serif',
             fontWeight: 'bold',
         };
 
         // Placeholder: Abu-abu Lavender (Sangat soft)
-        this.placeholderText = scene.add.text(x, visualY, 'WAITING FOR SPELL...', commonStyle)
+        this.placeholderText = scene.add.text(x, visualY, 'WAITING FOR SPELL..', commonStyle)
             .setOrigin(0.5)
             .setColor('#b2bec3') 
             .setAlpha(0.6)
-            .setDepth(11);
+            .setDepth(12);
 
         // Background Text (Huruf belum diketik): Abu-abu terang (High Quality Grey)
         this.bgText = scene.add.text(x, visualY, '', commonStyle)
             .setOrigin(0.5)
             .setColor('#d1d8e0') // Abu-abu sangat soft
-            .setDepth(11);
+            .setDepth(12);
 
         // Foreground Text (Huruf SUDAH diketik): Indigo Magis (Kontras tinggi)
         this.fgText = scene.add.text(x, visualY, '', commonStyle)
-            .setOrigin(0.5)
+            .setOrigin(0.6)
             .setColor('#4834d4') // Warna ungu indigo yang elegan
             .setShadow(1, 1, 'rgba(0,0,0,0.1)', 2) // Shadow tipis agar teks "timbul"
             .setDepth(12);

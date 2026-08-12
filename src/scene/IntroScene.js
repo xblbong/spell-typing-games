@@ -10,35 +10,47 @@ export class IntroScene extends Phaser.Scene {
      * [PRELOAD] Memuat aset gambar dekorasi & background
      */
     preload() {
+        //Minta browser untuk mendownload font '"Press Start 2P", monospace' di preload
+        if (document.fonts) {
+            document.fonts.load('10px ""Press Start 2P", monospace"');
+        }
+
         // Dekorasi Sudut Luar (Biru-Cyan)
         this.load.image('res_corner_outer', 'images/ui/corner_outer.png');
+
+        //background
+        this.load.image('res_background', 'images/background/Curiosa_alternatif.png');
     }
 
     create() {
+        document.fonts.ready.then(() => {
+            if (this.scene.isActive()) {
+                this.buildUI();
+            }
+        });
+
         const { width, height } = this.scale;
 
         // 1. LATAR BELAKANG GELAP (Malam / Space)
-        this.add.rectangle(0, 0, width, height, 0x0a0e27).setOrigin(0);
+        this.add.image(0, 0, 'res_background').setOrigin(0);
 
         // Hiasan Bintang-bintang Kecil di Latar Belakang
         for (let i = 0; i < 40; i++) {
             this.add.circle(
-                Phaser.Math.Between(0, width), 
-                Phaser.Math.Between(0, height), 
-                Phaser.Math.FloatBetween(0.8, 1.8), 
-                0xffffff, 
+                Phaser.Math.Between(0, width),
+                Phaser.Math.Between(0, height),
+                Phaser.Math.FloatBetween(0.8, 1.8),
+                0xffffff,
                 Phaser.Math.FloatBetween(0.2, 0.7)
             );
         }
 
         // 2. JUDUL UTAMA (SPELL TYPING GAME)
         this.add.text(width / 2, height * 0.30, 'SPELL TYPING GAME', {
-            fontSize: '44px',
-            fontFamily: 'monospace',
+            fontSize: '28px',
+            fontFamily: '"Press Start 2P", monospace',
             fontWeight: '900',
             color: '#ffffff',
-            stroke: '#000000',
-            strokeThickness: 6
         }).setOrigin(0.5);
 
         // 3. MODAL FRAME (Tengah Layar)
@@ -50,7 +62,7 @@ export class IntroScene extends Phaser.Scene {
 
         // Frame Utama (Navy Blue)
         const frame = this.add.graphics();
-        frame.fillStyle(0x151b40, 1);
+        frame.fillStyle(0x151b40, 0.5);
         frame.fillRoundedRect(-frameW / 2, -frameH / 2, frameW, frameH, 16);
 
         // Garis Tepi Ganda (Putih & Biru Muda)
@@ -73,7 +85,7 @@ export class IntroScene extends Phaser.Scene {
                 const cornerImg = this.add.image(pos.x, pos.y, 'res_corner_outer')
                     .setAngle(pos.angle)
                     .setFlip(pos.flipX, pos.flipY)
-                    .setScale(0.85);
+                    .setScale(0.60);
                 modal.add(cornerImg);
             });
         }
@@ -81,7 +93,7 @@ export class IntroScene extends Phaser.Scene {
         // 4. TEKS INSTRUKSI (Enter your mage name)
         const labelText = this.add.text(0, -80, 'Enter your mage name', {
             fontSize: '24px',
-            fontFamily: 'monospace',
+            fontFamily: '"Press Start 2P", monospace',
             fontWeight: 'bold',
             color: '#ffffff'
         }).setOrigin(0.5);
@@ -90,7 +102,7 @@ export class IntroScene extends Phaser.Scene {
         // 5. TEKS ERROR / PERINGATAN
         const errorText = this.add.text(0, 115, '', {
             fontSize: '15px',
-            fontFamily: 'monospace',
+            fontFamily: '"Press Start 2P", monospace',
             fontWeight: 'bold',
             color: '#ff4d6d'
         }).setOrigin(0.5);
@@ -114,7 +126,7 @@ export class IntroScene extends Phaser.Scene {
             border: '2px solid #a0c4ff',
             boxShadow: '0 0 15px rgba(255, 255, 255, 0.3), inset 0 3px 6px rgba(0, 0, 0, 0.2)',
             color: '#121736',
-            fontFamily: 'monospace',
+            fontFamily: '"Press Start 2P", monospace',
             fontWeight: 'bold',
             textAlign: 'center',
             outline: 'none',
@@ -167,8 +179,8 @@ export class IntroScene extends Phaser.Scene {
         drawBtn(0x3b59eb);
 
         const btnTxt = this.add.text(0, 0, 'Begin journey', {
-            fontSize: '17px',
-            fontFamily: 'monospace',
+            fontSize: '12px',
+            fontFamily: '"Press Start 2P", monospace',
             fontWeight: 'bold',
             color: '#ffffff',
         }).setOrigin(0.5);

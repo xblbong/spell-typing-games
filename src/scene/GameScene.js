@@ -155,7 +155,7 @@ export class GameScene extends Phaser.Scene {
         // Penyihir (Luma Cimol)
         this.wizard = this.add.image(150, height - 230, 'wizard_idle').setScale(0.3);
         this.add.text(150, height - 370, this.user.userName, {
-            fontSize: '24px', fontFamily: 'monospace', color: '#00ffcc',
+            fontSize: '24px', fontFamily: '"Press Start 2P", monospace', color: '#00ffcc',
             stroke: '#000000', strokeThickness: 3
         }).setOrigin(0.5);
 
@@ -172,7 +172,7 @@ export class GameScene extends Phaser.Scene {
         const hudY = 70; // Sedikit turun agar tidak mepet atas
         const textStyle = {
             fontSize: '24px', // Ukuran font diperbesar
-            fontFamily: 'monospace',
+            fontFamily: '"Press Start 2P", monospace',
             fontWeight: 'bold',
             color: '#ffffff',
             stroke: '#000000',

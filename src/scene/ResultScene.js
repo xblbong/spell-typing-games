@@ -39,16 +39,15 @@ export class ResultScene extends Phaser.Scene {
         // 2. CONTAINER UTAMA (Pusat Modal di Tengah Layar)
         const modal = this.add.container(width / 2, height / 2 - 10);
 
-        // 3. FRAME LUAR (Tinggi ditingkatkan dari 530 ke 580 agar ada Padding)
+        // 3. FRAME LUAR
         const frameW = 450;
         const frameH = 580;
 
         const frame = this.add.graphics();
-        // Latar Frame Luar (Navy Space Blue)
         frame.fillStyle(0x131836, 1);
         frame.fillRoundedRect(-frameW / 2, -frameH / 2, frameW, frameH, 16);
 
-        // Garis Tepi Ganda (Putih di luar, Biru Muda di dalam)
+        // Garis Tepi Ganda
         frame.lineStyle(5, 0xd0e3ff, 1);
         frame.strokeRoundedRect(-frameW / 2, -frameH / 2, frameW, frameH, 16);
         frame.lineStyle(3, 0x7a9ee6, 0.9);
@@ -68,33 +67,30 @@ export class ResultScene extends Phaser.Scene {
                 const cornerImg = this.add.image(pos.x, pos.y, 'res_corner_outer')
                     .setAngle(pos.angle)
                     .setFlip(pos.flipX, pos.flipY)
-                    .setScale(0.85);
+                    .setScale(0.75);
                 modal.add(cornerImg);
             });
         }
 
-        // --- B. IKON ATAS (💔 / 🏆) - Diturunkan sedikit agar tidak bocor dari border atas ---
+        // --- B. IKON ATAS (💔 / 🏆) ---
         const isWin = this.resultData.isWin;
         const topIconKey = isWin ? 'res_trophy' : 'res_defeat';
 
         if (this.textures.exists(topIconKey)) {
-            // Skala disesuaikan & Y diturunkan ke -220 agar ada padding 40px dari border atas
             const topIcon = this.add.image(0, -220, topIconKey).setScale(0.10);
             modal.add(topIcon);
         }
 
         // Teks Judul Kemenangan/Kekalahan
-        const titleText = this.add.text(0, -145, isWin ? 'VICTORY!' : 'DEFEATED!', {
-            fontSize: '36px',
+        const titleText = this.add.text(0, -160, isWin ? 'VICTORY!' : 'DEFEATED!', {
+            fontSize: '24px',
             fontWeight: '900',
             color: '#ffffff',
-            fontFamily: 'monospace',
-            stroke: '#000000',
-            strokeThickness: 6
+            fontFamily: '"Press Start 2P", monospace',
         }).setOrigin(0.5);
         modal.add(titleText);
 
-        // 4. INNER PANEL (Diperbesar sedikit tinggi & lebarnya)
+        // 4. INNER PANEL
         const innerW = 380;
         const innerH = 275;
         const innerY = 25;
@@ -106,7 +102,7 @@ export class ResultScene extends Phaser.Scene {
         innerBg.strokeRoundedRect(-innerW / 2, innerY - innerH / 2, innerW, innerH, 12);
         modal.add(innerBg);
 
-        // --- C. DEKORASI PANEL DALAM (2 Diamonds & 4 Corner Triangles) ---
+        // --- C. DEKORASI PANEL DALAM ---
         if (this.textures.exists('res_diamond')) {
             const topDiamond = this.add.image(0, innerY - innerH / 2, 'res_diamond').setScale(0.85);
             const bottomDiamond = this.add.image(0, innerY + innerH / 2, 'res_diamond').setScale(0.85);
@@ -115,10 +111,10 @@ export class ResultScene extends Phaser.Scene {
 
         if (this.textures.exists('res_corner_inner')) {
             const innerCorners = [
-                { x: -innerW / 2 + 8, y: innerY - innerH / 2 + 8, angle: 0 },   // Top-Left
-                { x: innerW / 2 - 8, y: innerY - innerH / 2 + 8, angle: 90 },  // Top-Right
-                { x: -innerW / 2 + 8, y: innerY + innerH / 2 - 8, angle: -90 },// Bottom-Left
-                { x: innerW / 2 - 8, y: innerY + innerH / 2 - 8, angle: 180 }  // Bottom-Right
+                { x: -innerW / 2 + 8, y: innerY - innerH / 2 + 8, angle: 0 },
+                { x: innerW / 2 - 8, y: innerY - innerH / 2 + 8, angle: 90 },
+                { x: -innerW / 2 + 8, y: innerY + innerH / 2 - 8, angle: -90 },
+                { x: innerW / 2 - 8, y: innerY + innerH / 2 - 8, angle: 180 }
             ];
             innerCorners.forEach(pos => {
                 const tri = this.add.image(pos.x, pos.y, 'res_corner_inner')
@@ -130,13 +126,13 @@ export class ResultScene extends Phaser.Scene {
 
         // 5. KONTEN ISI (Rank, Stats, Koin, XP, & Button)
         this.createContent(modal, innerY);
-        this.createXPBar(modal, 200);      // Digeser ke Y:200 agar ada jeda dari panel
-        this.createMainButton(modal, 290);  // Digeser ke Y:290 pas di bagian bawah frame
+        this.createXPBar(modal, 200);
+        this.createMainButton(modal, 290);
     }
 
     createContent(container, innerY) {
         // --- A. RANK BADGE ---
-        const rankY = innerY - 85; // Digeser lebih atas sedikit
+        const rankY = innerY - 85;
         const rankPill = this.add.graphics();
         rankPill.fillStyle(0x191e36, 1);
         rankPill.fillRoundedRect(-110, rankY - 18, 220, 36, 18);
@@ -145,19 +141,20 @@ export class ResultScene extends Phaser.Scene {
         container.add(rankPill);
 
         if (this.textures.exists('res_icon_star')) {
-            const rankIcon = this.add.image(-80, rankY, 'res_icon_star').setScale(0.08);
+            const rankIcon = this.add.image(-80, rankY, 'res_icon_star');
+            rankIcon.setDisplaySize(70, 70); // Ukuran Piksel Pasti
             container.add(rankIcon);
         }
         const rankText = this.add.text(-50, rankY, 'Rank: Seedling', {
-            fontSize: '15px', fontFamily: 'monospace', color: '#e2e8f0', fontWeight: 'bold'
+            fontSize: '10px', fontFamily: '"Press Start 2P", monospace', color: '#e2e8f0', fontWeight: 'bold'
         }).setOrigin(0, 0.5);
         container.add(rankText);
 
-        // --- B. STATS BOX (Latar Merah Keunguan Gelap & Border Merah) ---
-        const statsY = innerY - 10; // Posisi Tengah yang pas
-        const boxH = 46;
-        const boxW = 310;
-        const radius = boxH / 2; // Capsule / Pill Shape (100% Rounded)
+        // --- B. STATS BOX (WPM & ACCURACY) ---
+        const statsY = innerY - 10;
+        const boxH = 50;  
+        const boxW = 320; 
+        const radius = boxH / 2; // 25px (Full Pill)
 
         const statsBg = this.add.graphics();
         statsBg.fillStyle(0x29121a, 1);
@@ -169,39 +166,46 @@ export class ResultScene extends Phaser.Scene {
 
         // Stat Kiri: WPM
         if (this.textures.exists('res_icon_lightning')) {
-            const wpmIcon = this.add.image(-120, statsY, 'res_icon_lightning').setScale(0.05);
+            const wpmIcon = this.add.image(-122, statsY, 'res_icon_lightning');
+            wpmIcon.setDisplaySize(40, 40); 
             container.add(wpmIcon);
         }
-        const wpmVal = this.add.text(-90, statsY, `${this.resultData.wpm || 0} WPM`, {
-            fontSize: '18px', fontWeight: 'bold', color: '#ffffff', fontFamily: 'monospace'
+        const wpmVal = this.add.text(-92, statsY, `${this.resultData.wpm || 0} WPM`, {
+            fontSize: '14px', fontWeight: 'bold', color: '#ffffff', fontFamily: '"Press Start 2P", monospace'
         }).setOrigin(0, 0.5);
         container.add(wpmVal);
 
         // Stat Kanan: Accuracy
         if (this.textures.exists('res_icon_target')) {
-            const accIcon = this.add.image(25, statsY, 'res_icon_target').setScale(0.05);
+            const accIcon = this.add.image(32, statsY, 'res_icon_target');
+            accIcon.setDisplaySize(40, 40); // Ukuran Pasti 50x50px
             container.add(accIcon);
         }
-        const accVal = this.add.text(58, statsY, `${this.resultData.accuracy || 0}%`, {
-            fontSize: '18px', fontWeight: 'bold', color: '#ffffff', fontFamily: 'monospace'
+        const accVal = this.add.text(68, statsY, `${this.resultData.accuracy || 0}%`, {
+            fontSize: '14px', fontWeight: 'bold', color: '#ffffff', fontFamily: '"Press Start 2P", monospace'
         }).setOrigin(0, 0.5);
         container.add(accVal);
 
         // --- C. REWARD KOIN ---
-        const coinY = innerY + 65; // Digeser lebih bawah sedikit agar seimbang
+        const coinY = innerY + 68;
+        const coinW = 150; 
+        const coinH = 60;
+        const coinRadius = coinH / 2; // 14px
+
         const coinPill = this.add.graphics();
         coinPill.fillStyle(0x191e36, 1);
-        coinPill.fillRoundedRect(-90, coinY - 20, 180, 40, 20);
+        coinPill.fillRoundedRect(-coinW / 2, coinY - coinH / 2, coinW, coinH, coinRadius);
         coinPill.lineStyle(2, 0xfacc15, 1);
-        coinPill.strokeRoundedRect(-90, coinY - 20, 180, 40, 20);
+        coinPill.strokeRoundedRect(-coinW / 2, coinY - coinH / 2, coinW, coinH, coinRadius);
         container.add(coinPill);
 
         if (this.textures.exists('res_icon_coin')) {
-            const coinIcon = this.add.image(-55, coinY, 'res_icon_coin').setScale(0.05);
+            const coinIcon = this.add.image(-30, coinY, 'res_icon_coin');
+            coinIcon.setDisplaySize(50, 50); // UKURAN PASTI 30px (100% TIDAK KELUAR BORDER!)
             container.add(coinIcon);
         }
-        const coinVal = this.add.text(-25, coinY, `+${this.resultData.score || 0}`, {
-            fontSize: '22px', fontWeight: 'bold', color: '#ffffff', fontFamily: 'monospace'
+        const coinVal = this.add.text(2, coinY, `+${this.resultData.score || 0}`, {
+            fontSize: '14px', fontWeight: 'bold', color: '#ffffff', fontFamily: '"Press Start 2P", monospace'
         }).setOrigin(0, 0.5);
         container.add(coinVal);
     }
@@ -238,10 +242,10 @@ export class ResultScene extends Phaser.Scene {
             fillBar.fillRoundedRect(startX + cornerRadius / 2, y + barH - 2, lineW, 2, 1);
         }
 
-        const xpText = this.add.text(0, y + 26, '1,500 XP to next rank', {
-            fontSize: '13px',
+        const xpText = this.add.text(0, y + 40, '1,500 XP to next rank', {
+            fontSize: '12px',
             color: '#a0aec0',
-            fontFamily: 'monospace'
+            fontFamily: '"Press Start 2P", monospace'
         }).setOrigin(0.5);
 
         container.add([bgBar, fillBar, xpText]);
@@ -261,7 +265,7 @@ export class ResultScene extends Phaser.Scene {
         bg.strokeRoundedRect(-135, -25, 270, 50, 25);
 
         const txt = this.add.text(0, 0, btnText, {
-            fontSize: '20px', fontWeight: 'bold', color: '#ffffff', fontFamily: 'monospace'
+            fontSize: '16px', fontWeight: 'bold', color: '#ffffff', fontFamily: '"Press Start 2P", monospace'
         }).setOrigin(0.5);
 
         const hitArea = this.add.rectangle(0, 0, 270, 50, 0x000000, 0)
