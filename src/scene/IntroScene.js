@@ -32,7 +32,7 @@ export class IntroScene extends Phaser.Scene {
         }
 
         // 2. JUDUL UTAMA (SPELL TYPING GAME)
-        this.add.text(width / 2, height * 0.20, 'SPELL TYPING GAME', {
+        this.add.text(width / 2, height * 0.30, 'SPELL TYPING GAME', {
             fontSize: '44px',
             fontFamily: 'monospace',
             fontWeight: '900',
