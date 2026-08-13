@@ -24,6 +24,9 @@ export class MenuScene extends Phaser.Scene {
             if (level.bgKey && level.bgPath) {
                 this.load.image(level.bgKey, level.bgPath);
             }
+            if (level.bgKey && level.bgCover) {
+                this.load.image(`${level.bgKey}_cover`, level.bgCover);
+            }
         });
     }
 
@@ -139,9 +142,11 @@ export class MenuScene extends Phaser.Scene {
         prevBg.fillRoundedRect(-prevW / 2, prevY - prevH / 2, prevW, prevH, 10);
         cardContainer.add(prevBg);
 
+        const coverKey = `${level.bgKey}_cover`;
+        const textureToUse = this.textures.exists(coverKey) ? coverKey : level.bgKey;
         // Menampilkan Gambar Preview Latar Belakang Level (jika ada)
-        if (level.bgKey && this.textures.exists(level.bgKey)) {
-            const previewImg = this.add.image(0, prevY, level.bgKey);
+        if (this.textures.exists(textureToUse)) {
+            const previewImg = this.add.image(0, prevY, textureToUse);
             previewImg.setDisplaySize(prevW - 10, prevH - 10);
 
             // Membuat Topeng Masking Rounded agar gambar pas di dalam kotak

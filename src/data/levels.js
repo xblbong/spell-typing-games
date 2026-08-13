@@ -4,6 +4,7 @@ export const levelLibrary = [
         levelCategory: "Ez",
         bgKey: "bg_level1", // key untuk bg
         bgPath: "images/background/Curiosa_alternatif.png", // path untuk background
+        bgCover: "images/background/easy.png", // path untuk background
         enemyIDs: ["slime_red"],
         baseCoin: 10,
         minTarget: 5,       
@@ -14,6 +15,7 @@ export const levelLibrary = [
         levelCategory: "Norm",
         bgKey: "bg_level2", // key untuk bg
         bgPath: "images/background/Curiosa_alternatif.png", // path untuk background
+        bgCover: "images/background/normal.png", // path untuk background
         enemyIDs: ["slime_red", "goblin_mage"],
         baseCoin: 25,
         minTarget: 8,
@@ -24,6 +26,7 @@ export const levelLibrary = [
         levelCategory: "Hard",
         bgKey: "bg_level3", // key untuk bg
         bgPath: "images/background/Curiosa_alternatif.png", // path untuk background
+        bgCover: "images/background/hard.png", // path untuk background
         enemyIDs: ["goblin_mage", "dark_knight"],
         baseCoin: 40,
         minTarget: 12,
