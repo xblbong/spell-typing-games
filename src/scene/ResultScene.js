@@ -40,8 +40,8 @@ export class ResultScene extends Phaser.Scene {
         const modal = this.add.container(width / 2, height / 2 - 10);
 
         // 3. FRAME LUAR
-        const frameW = 450;
-        const frameH = 580;
+        const frameW = 380;
+        const frameH = 480;
 
         const frame = this.add.graphics();
         frame.fillStyle(0x131836, 1);
@@ -67,7 +67,7 @@ export class ResultScene extends Phaser.Scene {
                 const cornerImg = this.add.image(pos.x, pos.y, 'res_corner_outer')
                     .setAngle(pos.angle)
                     .setFlip(pos.flipX, pos.flipY)
-                    .setScale(0.75);
+                    .setScale(0.55);
                 modal.add(cornerImg);
             });
         }
@@ -77,13 +77,13 @@ export class ResultScene extends Phaser.Scene {
         const topIconKey = isWin ? 'res_trophy' : 'res_defeat';
 
         if (this.textures.exists(topIconKey)) {
-            const topIcon = this.add.image(0, -220, topIconKey).setScale(0.10);
+            const topIcon = this.add.image(0, -185, topIconKey).setScale(0.08);
             modal.add(topIcon);
         }
 
         // Teks Judul Kemenangan/Kekalahan
-        const titleText = this.add.text(0, -160, isWin ? 'VICTORY!' : 'DEFEATED!', {
-            fontSize: '24px',
+        const titleText = this.add.text(0, -135, isWin ? 'VICTORY!' : 'DEFEATED!', {
+            fontSize: '18px',
             fontWeight: '900',
             color: '#ffffff',
             fontFamily: '"Press Start 2P", monospace',
@@ -91,9 +91,9 @@ export class ResultScene extends Phaser.Scene {
         modal.add(titleText);
 
         // 4. INNER PANEL
-        const innerW = 380;
-        const innerH = 275;
-        const innerY = 25;
+        const innerW = 320;
+        const innerH = 230;
+        const innerY = 20;
 
         const innerBg = this.add.graphics();
         innerBg.fillStyle(0x15182e, 1);
@@ -126,8 +126,8 @@ export class ResultScene extends Phaser.Scene {
 
         // 5. KONTEN ISI (Rank, Stats, Koin, XP, & Button)
         this.createContent(modal, innerY);
-        this.createXPBar(modal, 200);
-        this.createMainButton(modal, 290);
+        this.createXPBar(modal, 170);
+        this.createMainButton(modal, 240);
     }
 
     createContent(container, innerY) {
@@ -142,18 +142,18 @@ export class ResultScene extends Phaser.Scene {
 
         if (this.textures.exists('res_icon_star')) {
             const rankIcon = this.add.image(-80, rankY, 'res_icon_star');
-            rankIcon.setDisplaySize(70, 70); // Ukuran Piksel Pasti
+            rankIcon.setDisplaySize(50, 50); // Ukuran Piksel Pasti
             container.add(rankIcon);
         }
         const rankText = this.add.text(-50, rankY, 'Rank: Seedling', {
-            fontSize: '10px', fontFamily: '"Press Start 2P", monospace', color: '#e2e8f0', fontWeight: 'bold'
+            fontSize: '8px', fontFamily: '"Press Start 2P", monospace', color: '#e2e8f0', fontWeight: 'bold'
         }).setOrigin(0, 0.5);
         container.add(rankText);
 
         // --- B. STATS BOX (WPM & ACCURACY) ---
         const statsY = innerY - 10;
-        const boxH = 50;  
-        const boxW = 320; 
+        const boxH = 40;  
+        const boxW = 270; 
         const radius = boxH / 2; // 25px (Full Pill)
 
         const statsBg = this.add.graphics();
@@ -166,30 +166,30 @@ export class ResultScene extends Phaser.Scene {
 
         // Stat Kiri: WPM
         if (this.textures.exists('res_icon_lightning')) {
-            const wpmIcon = this.add.image(-122, statsY, 'res_icon_lightning');
-            wpmIcon.setDisplaySize(40, 40); 
+            const wpmIcon = this.add.image(-100, statsY, 'res_icon_lightning');
+            wpmIcon.setDisplaySize(30, 30); 
             container.add(wpmIcon);
         }
-        const wpmVal = this.add.text(-92, statsY, `${this.resultData.wpm || 0} WPM`, {
-            fontSize: '14px', fontWeight: 'bold', color: '#ffffff', fontFamily: '"Press Start 2P", monospace'
+        const wpmVal = this.add.text(-75, statsY, `${this.resultData.wpm || 0} WPM`, {
+            fontSize: '10px', fontWeight: 'bold', color: '#ffffff', fontFamily: '"Press Start 2P", monospace'
         }).setOrigin(0, 0.5);
         container.add(wpmVal);
 
         // Stat Kanan: Accuracy
         if (this.textures.exists('res_icon_target')) {
-            const accIcon = this.add.image(32, statsY, 'res_icon_target');
-            accIcon.setDisplaySize(40, 40); // Ukuran Pasti 50x50px
+            const accIcon = this.add.image(28, statsY, 'res_icon_target');
+            accIcon.setDisplaySize(30, 30);
             container.add(accIcon);
         }
-        const accVal = this.add.text(68, statsY, `${this.resultData.accuracy || 0}%`, {
-            fontSize: '14px', fontWeight: 'bold', color: '#ffffff', fontFamily: '"Press Start 2P", monospace'
+        const accVal = this.add.text(55, statsY, `${this.resultData.accuracy || 0}%`, {
+            fontSize: '10px', fontWeight: 'bold', color: '#ffffff', fontFamily: '"Press Start 2P", monospace'
         }).setOrigin(0, 0.5);
         container.add(accVal);
 
         // --- C. REWARD KOIN ---
-        const coinY = innerY + 68;
-        const coinW = 150; 
-        const coinH = 60;
+        const coinY = innerY + 55;
+        const coinW = 130; 
+        const coinH = 46;
         const coinRadius = coinH / 2; // 14px
 
         const coinPill = this.add.graphics();
@@ -200,19 +200,19 @@ export class ResultScene extends Phaser.Scene {
         container.add(coinPill);
 
         if (this.textures.exists('res_icon_coin')) {
-            const coinIcon = this.add.image(-30, coinY, 'res_icon_coin');
-            coinIcon.setDisplaySize(50, 50); // UKURAN PASTI 30px (100% TIDAK KELUAR BORDER!)
+            const coinIcon = this.add.image(-25, coinY, 'res_icon_coin');
+            coinIcon.setDisplaySize(36, 36);
             container.add(coinIcon);
         }
         const coinVal = this.add.text(2, coinY, `+${this.resultData.score || 0}`, {
-            fontSize: '14px', fontWeight: 'bold', color: '#ffffff', fontFamily: '"Press Start 2P", monospace'
+            fontSize: '10px', fontWeight: 'bold', color: '#ffffff', fontFamily: '"Press Start 2P", monospace'
         }).setOrigin(0, 0.5);
         container.add(coinVal);
     }
 
     createXPBar(container, y) {
-        const barW = 340;
-        const barH = 18;
+        const barW = 280;
+        const barH = 14;
         const progress = 0.75;
         const currentW = barW * progress;
         const startX = -barW / 2;
@@ -242,8 +242,8 @@ export class ResultScene extends Phaser.Scene {
             fillBar.fillRoundedRect(startX + cornerRadius / 2, y + barH - 2, lineW, 2, 1);
         }
 
-        const xpText = this.add.text(0, y + 40, '1,500 XP to next rank', {
-            fontSize: '12px',
+        const xpText = this.add.text(0, y + 32, '1,500 XP to next rank', {
+            fontSize: '8px',
             color: '#a0aec0',
             fontFamily: '"Press Start 2P", monospace'
         }).setOrigin(0.5);
@@ -265,7 +265,7 @@ export class ResultScene extends Phaser.Scene {
         bg.strokeRoundedRect(-135, -25, 270, 50, 25);
 
         const txt = this.add.text(0, 0, btnText, {
-            fontSize: '16px', fontWeight: 'bold', color: '#ffffff', fontFamily: '"Press Start 2P", monospace'
+            fontSize: '12px', fontWeight: 'bold', color: '#ffffff', fontFamily: '"Press Start 2P", monospace'
         }).setOrigin(0.5);
 
         const hitArea = this.add.rectangle(0, 0, 270, 50, 0x000000, 0)

@@ -15,17 +15,16 @@ export const startPhaser = (containerId) => {
     return new Phaser.Game({
         type: Phaser.AUTO,
         parent: containerId,
-        // FULLSCREEN:
         scale: {
-            mode: Phaser.Scale.RESIZE,
+            mode: Phaser.Scale.FIT,
             autoCenter: Phaser.Scale.CENTER_BOTH,
-            width: '100%',
-            height: '100%'
+            width: 1280,
+            height: 720
         },
         physics: {
             default: 'arcade',
             arcade: { debug: false }
         },
-        scene: [IntroScene,  MenuScene, GameScene, ResultScene]
+        scene: [IntroScene, MenuScene, GameScene, ResultScene]
     });
 };

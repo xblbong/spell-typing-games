@@ -153,9 +153,9 @@ export class GameScene extends Phaser.Scene {
         }
 
         // Penyihir (Luma Cimol)
-        this.wizard = this.add.image(150, height - 230, 'wizard_idle').setScale(0.3);
-        this.add.text(150, height - 370, this.user.userName, {
-            fontSize: '24px', fontFamily: '"Press Start 2P", monospace', color: '#00ffcc',
+        this.wizard = this.add.image(120, height - 200, 'wizard_idle').setScale(0.25);
+        this.add.text(120, height - 320, this.user.userName, {
+            fontSize: '16px', fontFamily: '"Press Start 2P", monospace', color: '#00ffcc',
             stroke: '#000000', strokeThickness: 3
         }).setOrigin(0.5);
 
@@ -169,9 +169,9 @@ export class GameScene extends Phaser.Scene {
      * [SETUP HUD] Header bar untuk nyawa, skor, dan info level.
      */
     setupHUD(width, height) {
-        const hudY = 70; // Sedikit turun agar tidak mepet atas
+        const hudY = 45; // Sedikit turun agar tidak mepet atas
         const textStyle = {
-            fontSize: '24px', // Ukuran font diperbesar
+            fontSize: '14px', // Ukuran font diperkecil untuk 1280x720
             fontFamily: '"Press Start 2P", monospace',
             fontWeight: 'bold',
             color: '#ffffff',
@@ -180,24 +180,24 @@ export class GameScene extends Phaser.Scene {
         };
 
         // 1. MANA BAR (Kiri Atas)
-        this.manaBg = this.add.image(350, hudY, 'ui_mana_bg').setOrigin(0.5).setScale(0.80);
+        this.manaBg = this.add.image(250, hudY, 'ui_mana_bg').setOrigin(0.5).setScale(0.55);
         this.manaFill = this.add.graphics();
 
         // 2. SKULL BAR (Musuh)
-        const skullX = width * 0.48;
-        this.add.image(skullX, hudY, 'ui_skull').setOrigin(0.5).setScale(0.85);
-        // Offset ditambah ke +75 agar teks di tengah area hitam
-        this.infoDefeatedText = this.add.text(skullX + 36, hudY, '', textStyle).setOrigin(0.5);
+        const skullX = width * 0.52;
+        this.add.image(skullX, hudY, 'ui_skull').setOrigin(0.5).setScale(0.60);
+        // Offset ditambah ke +25 agar teks di tengah area hitam
+        this.infoDefeatedText = this.add.text(skullX + 25, hudY, '', textStyle).setOrigin(0.5);
 
         // 3. TIMER BAR
-        const timerX = width * 0.63;
-        this.add.image(timerX, hudY, 'ui_timer').setOrigin(0.5).setScale(0.85);
-        this.infoTimerText = this.add.text(timerX + 36, hudY, '', textStyle).setOrigin(0.5);
+        const timerX = width * 0.67;
+        this.add.image(timerX, hudY, 'ui_timer').setOrigin(0.5).setScale(0.60);
+        this.infoTimerText = this.add.text(timerX + 25, hudY, '', textStyle).setOrigin(0.5);
 
         // 4. COIN BAR
-        const coinX = width - 190;
-        this.add.image(coinX, hudY, 'ui_coin').setOrigin(0.5).setScale(0.85);
-        this.coinText = this.add.text(coinX + 36, hudY, '', textStyle).setOrigin(0.5);
+        const coinX = width - 130;
+        this.add.image(coinX, hudY, 'ui_coin').setOrigin(0.5).setScale(0.60);
+        this.coinText = this.add.text(coinX + 25, hudY, '', textStyle).setOrigin(0.5);
 
         this.updateUI();
     }
@@ -469,16 +469,16 @@ export class GameScene extends Phaser.Scene {
 
             // Menghitung posisi agar pas di dalam lubang hitam mana_bar.png
             // Kita geser fillStartX lebih ke kiri sedikit mendekati icon bulan
-            const fillStartX = this.manaBg.x - 188;
-            const fillStartY = this.manaBg.y - 12.5; // Naik dikit agar center vertikal
+            const fillStartX = this.manaBg.x - 130;
+            const fillStartY = this.manaBg.y - 9; // Naik dikit agar center vertikal
 
-            const maxFillWidth = 450; // Diperpanjang agar full ke kanan
-            const fillHeight = 25;    // Dipertebal (sebelumnya 14)
+            const maxFillWidth = 310; // Diperkecil sesuai skala bar
+            const fillHeight = 18;    // Diperkecil sesuai skala bar
 
             const currentFillWidth = (this.state.mana / 1000) * maxFillWidth;
 
             if (currentFillWidth > 0) {
-                const cornerRadius = 12.5;
+                const cornerRadius = 9;
                 const topHalfHeight = fillHeight / 2;
 
                 // --- 1. LAPISAN BAWAH (BIRU GELAP) ---
@@ -486,22 +486,21 @@ export class GameScene extends Phaser.Scene {
                 // Gambar bar rounded seperti biasa
                 this.manaFill.fillRoundedRect(fillStartX, fillStartY, currentFillWidth, fillHeight, cornerRadius);
                 // Tambahkan kotak kecil di kiri untuk "menghapus" lengkungan kiri agar jadi DATAR
-                // Kita buat lebarnya 15 pixel saja
-                this.manaFill.fillRect(fillStartX, fillStartY, 15, fillHeight);
+                this.manaFill.fillRect(fillStartX, fillStartY, 10, fillHeight);
 
 
                 // --- 2. LAPISAN ATAS (CYAN CERAH) ---
                 this.manaFill.fillStyle(0x00ffff, 1);
                 // Gambar bar rounded bagian atas
-                this.manaFill.fillRoundedRect(fillStartX, fillStartY, currentFillWidth, topHalfHeight + 2, 10);
+                this.manaFill.fillRoundedRect(fillStartX, fillStartY, currentFillWidth, topHalfHeight + 2, 7);
                 // Tambahkan kotak kecil di kiri agar bagian atas juga DATAR
-                this.manaFill.fillRect(fillStartX, fillStartY, 15, topHalfHeight + 2);
+                this.manaFill.fillRect(fillStartX, fillStartY, 10, topHalfHeight + 2);
 
 
                 // --- 3. (OPSIONAL) KILAUAN / GLOSS ---
                 this.manaFill.fillStyle(0xffffff, 0.2);
                 // Kilauan kita buat sedikit menjorok ke kanan agar tidak menempel ke pinggir datar
-                this.manaFill.fillRoundedRect(fillStartX + 10, fillStartY + 2, currentFillWidth - 20, 5, 2);
+                this.manaFill.fillRoundedRect(fillStartX + 8, fillStartY + 2, currentFillWidth - 16, 3, 1);
             }
         }
 

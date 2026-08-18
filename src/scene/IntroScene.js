@@ -32,7 +32,7 @@ export class IntroScene extends Phaser.Scene {
         const { width, height } = this.scale;
 
         // 1. LATAR BELAKANG GELAP (Malam / Space)
-        this.add.image(0, 0, 'res_background').setOrigin(0);
+        this.add.image(width / 2, height / 2, 'res_background').setDisplaySize(width, height);
 
         // Hiasan Bintang-bintang Kecil di Latar Belakang
         for (let i = 0; i < 40; i++) {
@@ -46,16 +46,16 @@ export class IntroScene extends Phaser.Scene {
         }
 
         // 2. JUDUL UTAMA (SPELL TYPING GAME)
-        this.add.text(width / 2, height * 0.30, 'SPELL TYPING GAME', {
-            fontSize: '28px',
+        this.add.text(width / 2, height * 0.25, 'SPELL TYPING GAME', {
+            fontSize: '24px',
             fontFamily: '"Press Start 2P", monospace',
             fontWeight: '900',
             color: '#ffffff',
         }).setOrigin(0.5);
 
         // 3. MODAL FRAME (Tengah Layar)
-        const frameW = 680;
-        const frameH = 340;
+        const frameW = 560;
+        const frameH = 280;
         const modalY = height * 0.56;
 
         const modal = this.add.container(width / 2, modalY);
@@ -91,8 +91,8 @@ export class IntroScene extends Phaser.Scene {
         }
 
         // 4. TEKS INSTRUKSI (Enter your mage name)
-        const labelText = this.add.text(0, -80, 'Enter your mage name', {
-            fontSize: '24px',
+        const labelText = this.add.text(0, -70, 'Enter your mage name', {
+            fontSize: '18px',
             fontFamily: '"Press Start 2P", monospace',
             fontWeight: 'bold',
             color: '#ffffff'
@@ -100,8 +100,8 @@ export class IntroScene extends Phaser.Scene {
         modal.add(labelText);
 
         // 5. TEKS ERROR / PERINGATAN
-        const errorText = this.add.text(0, 115, '', {
-            fontSize: '15px',
+        const errorText = this.add.text(0, 110, '', {
+            fontSize: '12px',
             fontFamily: '"Press Start 2P", monospace',
             fontWeight: 'bold',
             color: '#ff4d6d'
@@ -164,7 +164,7 @@ export class IntroScene extends Phaser.Scene {
         setTimeout(() => inputElement.focus(), 100);
 
         // 7. TOMBOL "BEGIN JOURNEY" (Kapsul Biru)
-        const btnY = 80;
+        const btnY = 65;
         const btnContainer = this.add.container(0, btnY);
         modal.add(btnContainer);
 

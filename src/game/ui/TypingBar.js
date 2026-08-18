@@ -9,13 +9,13 @@ export default class TypingBar {
 
         // 1. Gambar Bubble (Alpha sedikit dikurangi agar menyatu dengan background)
         this.bubbleImage = scene.add.image(x, y, 'ui_typing_bubble')
-            .setScale(0.5)
+            .setScale(0.4)
             .setDepth(10)
             .setAlpha(0.95);
 
         // 2. Gaya tulisan Minimalis & Modern
         const commonStyle = {
-            fontSize: '12px', 
+            fontSize: '10px', 
             fontFamily: '"Press Start 2P", monospace, Arial, sans-serif',
             fontWeight: 'bold',
         };
@@ -41,7 +41,7 @@ export default class TypingBar {
             .setDepth(12);
 
         // Kursor: Tipis dan Elegan (Warna Ungu Muda)
-        this.cursor = scene.add.rectangle(x, visualY, 2, 28, 0x686de0)
+        this.cursor = scene.add.rectangle(x, visualY, 2, 22, 0x686de0)
             .setOrigin(0.5)
             .setVisible(false)
             .setDepth(13);
@@ -49,7 +49,7 @@ export default class TypingBar {
         // Animasi napas yang lebih halus (Slow & Smooth)
         this.scene.tweens.add({
             targets: this.bubbleImage,
-            scale: 0.52,
+            scale: 0.42,
             duration: 2000,
             yoyo: true,
             repeat: -1,

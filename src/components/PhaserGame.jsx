@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { startPhaser } from '../game/main';
+import { initCrazyGamesSDK } from '../game/CrazyGamesSDK';
 
 export default function PhaserGame() {
     const gameRef = useRef(null); // Penanda untuk container div
@@ -9,6 +10,8 @@ export default function PhaserGame() {
         // Nyalakan game hanya sekali saat komponen muncul
         if (!phaserInstance.current) {
             phaserInstance.current = startPhaser('game-container');
+            // Inisialisasi CrazyGames SDK untuk integrasi audio muting
+            initCrazyGamesSDK(phaserInstance.current);
         }
 
         // Cleanup, Matikan game saat pindah halaman/komponen dihapus

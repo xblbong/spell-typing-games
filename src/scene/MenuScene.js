@@ -2,8 +2,8 @@ import Phaser from 'phaser';
 import { levelLibrary } from '../data/levels';
 
 export class MenuScene extends Phaser.Scene {
-    constructor() { 
-        super('MenuScene'); 
+    constructor() {
+        super('MenuScene');
     }
 
     /**
@@ -34,32 +34,32 @@ export class MenuScene extends Phaser.Scene {
         const { width, height } = this.scale;
 
         // 1. LATAR BELAKANG GELAP (Space / Night Theme)
-        this.add.image(0, 0, 'res_background').setOrigin(0);
+        this.add.image(width / 2, height / 2, 'res_background').setDisplaySize(width, height);
 
         // Hiasan Bintang-Bintang Kecil
         for (let i = 0; i < 50; i++) {
             this.add.circle(
-                Phaser.Math.Between(0, width), 
-                Phaser.Math.Between(0, height), 
-                Phaser.Math.FloatBetween(0.8, 1.8), 
-                0xffffff, 
+                Phaser.Math.Between(0, width),
+                Phaser.Math.Between(0, height),
+                Phaser.Math.FloatBetween(0.8, 1.8),
+                0xffffff,
                 Phaser.Math.FloatBetween(0.2, 0.7)
             );
         }
 
         // 2. JUDUL UTAMA ("Choose your mission")
-        this.add.text(width / 2, height * 0.20, 'Choose your mission', { 
-            fontSize: '32px', 
-            fontFamily: '"Press Start 2P", monospace', 
+        this.add.text(width / 2, height * 0.15, 'Choose your mission', {
+            fontSize: '28px',
+            fontFamily: '"Press Start 2P", monospace',
             fontWeight: '900',
             color: '#ffffff',
         }).setOrigin(0.5);
 
         // 3. PENGATURAN TATA LETAK 3 KARTU LEVEL (Horisontal Side-by-Side)
-        const cardW = 400;
-        const cardH = 470;
-        const cardY = height * 0.58;
-        const spacing = 500; // Jarak antar kartu
+        const cardW = 300;
+        const cardH = 380;
+        const cardY = height * 0.55;
+        const spacing = 380; // Jarak antar kartu
 
         // Menghitung posisi X awal agar 3 kartu berada pas di tengah layar
         const totalWidth = (levelLibrary.length - 1) * spacing;
@@ -103,7 +103,7 @@ export class MenuScene extends Phaser.Scene {
                 const cornerImg = this.add.image(pos.x, pos.y, 'res_corner_outer')
                     .setAngle(pos.angle)
                     .setFlip(pos.flipX, pos.flipY)
-                    .setScale(0.50);
+                    .setScale(0.35);
                 cardContainer.add(cornerImg);
             });
         }
@@ -114,7 +114,7 @@ export class MenuScene extends Phaser.Scene {
 
         // Nama Level (Misal: Mystic Forest)
         const nameText = this.add.text(0, titleY, level.levelName || `Level ${index + 1}`, {
-            fontSize: '22px',
+            fontSize: '14px',
             fontFamily: '"Press Start 2P", monospace',
             fontWeight: 'bold',
             color: '#ffffff'
@@ -123,7 +123,7 @@ export class MenuScene extends Phaser.Scene {
         // Warna Teks Kesulitan (Easy = Hijau, Normal = Kuning, Hard = Merah)
         const diffColor = this.getDifficultyColor(level.levelCategory);
         const categoryText = this.add.text(0, diffY, level.levelCategory || 'Normal', {
-            fontSize: '16px',
+            fontSize: '10px',
             fontFamily: '"Press Start 2P", monospace',
             fontWeight: 'bold',
             color: diffColor
@@ -132,9 +132,9 @@ export class MenuScene extends Phaser.Scene {
         cardContainer.add([nameText, categoryText]);
 
         // --- D. KOTAK PREVIEW GAMBAR LEVEL ---
-        const prevW = 280;
-        const prevH = 220;
-        const prevY = 0;
+        const prevW = 220;
+        const prevH = 170;
+        const prevY = -20;
 
         // Background tempat preview gambar
         const prevBg = this.add.graphics();
@@ -190,14 +190,14 @@ export class MenuScene extends Phaser.Scene {
         const footerY = height / 2 - 70;
 
         // 1. Ikon Tengkorak & Teks Target (Sebelah Kiri)
-        const skullX = -width / 2 + 110;
+        const skullX = -width / 2 + 80;
         if (this.textures.exists('res_icon_skull')) {
-            const skullIcon = this.add.image(skullX, footerY, 'res_icon_skull').setScale(0.65);
+            const skullIcon = this.add.image(skullX, footerY, 'res_icon_skull').setScale(0.50);
             cardContainer.add(skullIcon);
         }
 
         const targetText = this.add.text(skullX + 2, footerY, `0/${level.minTarget || 5}`, {
-            fontSize: '14px',
+            fontSize: '10px',
             fontFamily: '"Press Start 2P", monospace',
             fontWeight: 'bold',
             color: '#ffffff'
@@ -219,7 +219,7 @@ export class MenuScene extends Phaser.Scene {
         drawBtn(0x3b59eb);
 
         const btnTxt = this.add.text(0, 0, 'Enter', {
-            fontSize: '12px',
+            fontSize: '10px',
             fontFamily: '"Press Start 2P", monospace',
             fontWeight: 'bold',
             color: '#ffffff'

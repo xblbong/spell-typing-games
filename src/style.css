@@ -26,7 +26,17 @@ body {
 
 .app-container {
     position: relative;
+    width: 100vw;
     height: 100vh;
+}
+
+#game-container {
+    width: 100%;
+    height: 100%;
+}
+
+#game-container canvas {
+    display: block;
 }
 
 .overlay-ui {
