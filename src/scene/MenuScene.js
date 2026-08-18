@@ -57,7 +57,7 @@ export class MenuScene extends Phaser.Scene {
 
         // 3. PENGATURAN TATA LETAK 3 KARTU LEVEL (Horisontal Side-by-Side)
         const cardW = 300;
-        const cardH = 380;
+        const cardH = 450;
         const cardY = height * 0.55;
         const spacing = 380; // Jarak antar kartu
 
@@ -133,8 +133,8 @@ export class MenuScene extends Phaser.Scene {
 
         // --- D. KOTAK PREVIEW GAMBAR LEVEL ---
         const prevW = 220;
-        const prevH = 170;
-        const prevY = -20;
+        const prevH = 180;
+        const prevY = 2;
 
         // Background tempat preview gambar
         const prevBg = this.add.graphics();
